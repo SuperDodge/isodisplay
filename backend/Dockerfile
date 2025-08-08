@@ -1,9 +1,13 @@
-FROM python:3.11-slim
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
+FROM node:18-bullseye
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY app ./app
-EXPOSE 8000
-CMD ["gunicorn","-k","uvicorn.workers.UvicornWorker","app.main:app","--bind","0.0.0.0:8000"]
+
+COPY package.json package-lock.json* ./
+RUN if [ -f package-lock.json ]; then \
+      npm ci --only=production --no-audit --no-fund --legacy-peer-deps ; \
+    else \
+      npm install --only=production --no-audit --no-fund --legacy-peer-deps ; \
+    fi
+
+COPY . .
+EXPOSE 5000
+CMD ["node", "server.js"]

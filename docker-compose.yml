@@ -1,34 +1,24 @@
 version: "3.9"
+
 services:
-  frontend:
-    build: ./frontend
-    environment:
-      - VITE_API_URL=http://backend:8000
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: isodisplay-backend
     ports:
-      - "8080:80"
+      - "5000:5000"  # backend port mapping
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: isodisplay-frontend
+    ports:
+      - "8080:80"  # frontend will be served by nginx
     depends_on:
       - backend
-
-  backend:
-    build: ./backend
-    environment:
-      - DATABASE_URL=postgresql+psycopg2://app:app@db:5432/isodisplay
-      - FRONTEND_ORIGIN=http://localhost:8080
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-    volumes:
-      - ./backend/uploads:/app/uploads
-
-  db:
-    image: postgres:16
-    environment:
-      - POSTGRES_USER=app
-      - POSTGRES_PASSWORD=app
-      - POSTGRES_DB=isodisplay
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-volumes:
-  pgdata:
+    restart: unless-stopped
