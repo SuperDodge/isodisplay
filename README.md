@@ -1,3 +1,9 @@
+> **📌 Codex Developers:**  
+> Before making changes, please read the full project background in  
+> [docs/context.md](docs/context.md).
+
+---
+
 # IsoDisplay App (Monorepo)
 
 Frontend (Vite/Nginx) + Backend (FastAPI) + Postgres, containerized and ready to run.
