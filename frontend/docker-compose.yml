@@ -1,9 +1,25 @@
 version: "3.9"
+
 services:
-  web:
-    build: .
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-portainer}
     ports:
-      - "8080:80"
-    env_file:
-      - .env
+      - "5001:5000"        # expose backend on host:5001
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://backend:5000
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"          # app on http://<host>:8080
     restart: unless-stopped
