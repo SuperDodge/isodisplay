@@ -1,15 +1,15 @@
-import { base44 } from './base44Client';
+import * as localAuth from "./localAuth";
 
 
-export const ContentItem = base44.entities.ContentItem;
+export const ContentItem = localAuth.entities.ContentItem;
 
-export const Playlist = base44.entities.Playlist;
+export const Playlist = localAuth.entities.Playlist;
 
-export const DisplaySettings = base44.entities.DisplaySettings;
+export const DisplaySettings = localAuth.entities.DisplaySettings;
 
-export const Display = base44.entities.Display;
+export const Display = localAuth.entities.Display;
 
 
 
 // auth sdk:
-export const User = base44.auth;
+export const User = localAuth.auth;

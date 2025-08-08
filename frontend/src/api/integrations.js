@@ -1,19 +1,19 @@
-import { base44 } from './base44Client';
+import * as localAuth from "./localAuth";
 
 
 
 
-export const Core = base44.integrations.Core;
+export const Core = localAuth.integrations.Core;
 
-export const InvokeLLM = base44.integrations.Core.InvokeLLM;
+export const InvokeLLM = localAuth.integrations.Core.InvokeLLM;
 
-export const SendEmail = base44.integrations.Core.SendEmail;
+export const SendEmail = localAuth.integrations.Core.SendEmail;
 
-export const UploadFile = base44.integrations.Core.UploadFile;
+export const UploadFile = localAuth.integrations.Core.UploadFile;
 
-export const GenerateImage = base44.integrations.Core.GenerateImage;
+export const GenerateImage = localAuth.integrations.Core.GenerateImage;
 
-export const ExtractDataFromUploadedFile = base44.integrations.Core.ExtractDataFromUploadedFile;
+export const ExtractDataFromUploadedFile = localAuth.integrations.Core.ExtractDataFromUploadedFile;
 
 
 
