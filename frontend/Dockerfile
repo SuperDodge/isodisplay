@@ -2,6 +2,9 @@
 FROM node:18-bullseye AS build
 WORKDIR /app
 
+ARG VITE_API_URL=http://backend:5000
+ENV VITE_API_URL=$VITE_API_URL
+
 COPY package.json package-lock.json* ./
 RUN if [ -f package-lock.json ]; then \
       npm ci --no-audit --no-fund --legacy-peer-deps ; \
