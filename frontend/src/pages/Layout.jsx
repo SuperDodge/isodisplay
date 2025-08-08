@@ -1,6 +1,6 @@
 
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { User } from "@/api/entities";
@@ -9,12 +9,9 @@ import {
   Monitor,
   PlayCircle,
   FolderOpen,
-  Settings,
   Upload,
   Users,
   LogOut,
-  Menu,
-  X,
   Tv
 } from "lucide-react";
 import {
@@ -33,12 +30,19 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+/* eslint-disable react/prop-types */
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [displays, setDisplays] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
 
   useEffect(() => {
     loadLayoutData();
@@ -52,7 +56,7 @@ export default function Layout({ children, currentPageName }) {
       ]);
       setUser(userData);
       setDisplays(displaysData);
-    } catch (error) {
+    } catch {
       console.log("User not authenticated or error loading data");
     }
     setIsLoading(false);
@@ -61,6 +65,17 @@ export default function Layout({ children, currentPageName }) {
   const handleLogout = async () => {
     await User.logout();
     window.location.reload();
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginError("");
+    try {
+      await User.login(username, password);
+      setUser(User.getUser ? User.getUser() : { username });
+    } catch {
+      setLoginError("Login failed");
+    }
   };
 
   const navigationItems = [
@@ -147,13 +162,37 @@ export default function Layout({ children, currentPageName }) {
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">IsoDisplay</h1>
           <p className="text-gray-300 mb-8">Professional Digital Signage Management</p>
-          <Button 
-            onClick={() => User.login()} 
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-lg border-none transition-all duration-300 shadow-lg"
-          >
-            <Users className="w-5 h-5 mr-2" />
-            Sign In to Continue
-          </Button>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="text-left">
+              <Label htmlFor="username" className="text-gray-300">Username</Label>
+              <Input
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="mt-1 bg-white/5 text-white border-white/20 placeholder-gray-400"
+                placeholder="Enter username"
+              />
+            </div>
+            <div className="text-left">
+              <Label htmlFor="password" className="text-gray-300">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 bg-white/5 text-white border-white/20 placeholder-gray-400"
+                placeholder="Enter password"
+              />
+            </div>
+            {loginError && <p className="text-red-400 text-sm">{loginError}</p>}
+            <Button
+              type="submit"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-lg border-none transition-all duration-300 shadow-lg"
+            >
+              <Users className="w-5 h-5 mr-2" />
+              Sign In
+            </Button>
+          </form>
         </div>
       </div>
     );
