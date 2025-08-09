@@ -14,7 +14,10 @@ export const ContentItem = {
 };
 
 export const Playlist = {
-  list: (params) => playlistsApi.list(params),
+  list: (paramsOrOrder) => {
+    const params = typeof paramsOrOrder === "object" ? paramsOrOrder : {};
+    return playlistsApi.list(params);
+  },
   filter: async (params = {}) => {
     if (params.id) {
       const pl = await playlistsApi.get(params.id);
