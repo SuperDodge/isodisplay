@@ -76,8 +76,11 @@ class Playlist(BaseModel):
     is_active: bool
     loop: bool
     transition_effect: str
-    items: list[PlaylistItem] = []
-    class Config: from_attributes = True
+    content_items: list[PlaylistItem] = Field(default_factory=list, alias="items")
+
+    class Config:
+        from_attributes = True
+        populate_by_name = True
 
 # ---- Display ----
 class DisplayBase(BaseModel):
