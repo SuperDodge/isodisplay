@@ -1,7 +1,9 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import content, playlists, displays, settings
+from fastapi.staticfiles import StaticFiles
+from .routes import content, playlists, displays, settings, uploads
+from .routes.uploads import UPLOAD_DIR
 from .db import Base, engine
 
 Base.metadata.create_all(bind=engine)
@@ -21,6 +23,9 @@ app.include_router(content.router)
 app.include_router(playlists.router)
 app.include_router(displays.router)
 app.include_router(settings.router)
+app.include_router(uploads.router)
+
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 @app.get("/health")
 def health():
