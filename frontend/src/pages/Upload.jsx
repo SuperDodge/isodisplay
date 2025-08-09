@@ -643,7 +643,8 @@ export default function Upload() {
                   Cancel
                 </Button>
                 <Button
-                  type="submit"
+                  type="button"
+                  onClick={handleSubmit}
                   disabled={isUploading || (!uploadedFiles.length && !urlContent && !textContent)}
                   className="bg-orange-500 hover:bg-orange-600 text-white border-none shadow-lg"
                 >
