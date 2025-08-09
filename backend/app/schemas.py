@@ -89,6 +89,7 @@ class DisplayBase(BaseModel):
     background_color: str = "#000000"
     show_clock: bool = False
     clock_position: str = "top-right"
+    refresh_interval: int = 300
 
 class DisplayCreate(DisplayBase): pass
 
@@ -101,6 +102,7 @@ class DisplayUpdate(BaseModel):
     background_color: Optional[str] = None
     show_clock: Optional[bool] = None
     clock_position: Optional[str] = None
+    refresh_interval: Optional[int] = None
 
 class Display(DisplayBase):
     id: str
@@ -111,6 +113,7 @@ class DisplaySettingsBase(BaseModel):
     background_color: str = "#000000"
     show_clock: bool = False
     clock_position: str = "top-right"
+    refresh_interval: int = 300
 
 class DisplaySettingsUpdate(DisplaySettingsBase): pass
 
