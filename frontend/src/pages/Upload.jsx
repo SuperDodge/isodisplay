@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { UploadFile } from "@/api/integrations";
 import { ContentItem } from "@/api/entities";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,6 @@ import {
   Globe, 
   Youtube, 
   FileText, 
-  Camera, 
   Plus,
   X,
   CheckCircle
@@ -105,11 +104,10 @@ export default function Upload() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsUploading(true);
-    let createdItem = null;
 
     try {
       if (contentType === 'image' || contentType === 'video' || contentType === 'pdf') {
-        // For file uploads, we'll handle the first file to open it in the editor.
+        // For file uploads, process the first file immediately.
         if (uploadedFiles.length > 0) {
             const file = uploadedFiles[0];
             const { file_url } = await UploadFile({ file });
@@ -120,7 +118,7 @@ export default function Upload() {
               thumbnail = ''; 
             }
 
-            createdItem = await ContentItem.create({
+            await ContentItem.create({
               title: formData.title || file.name,
               type: contentType,
               content: file_url,
@@ -166,7 +164,7 @@ export default function Upload() {
           processedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&showinfo=0&rel=0` : urlContent;
         }
 
-        createdItem = await ContentItem.create({
+        await ContentItem.create({
           title: formData.title,
           type: contentType,
           content: processedUrl,
@@ -178,7 +176,7 @@ export default function Upload() {
           is_active: true
         });
       } else if (contentType === 'text') {
-        createdItem = await ContentItem.create({
+        await ContentItem.create({
           title: formData.title,
           type: 'text',
           content: textContent,
@@ -192,11 +190,7 @@ export default function Upload() {
         });
       }
 
-      if (createdItem) {
-        navigate(createPageUrl(`ContentLibrary?edit=${createdItem.id}`));
-      } else {
-        navigate(createPageUrl("ContentLibrary"));
-      }
+      navigate(createPageUrl("ContentLibrary"));
     } catch (error) {
       console.error('Upload error:', error);
       setIsUploading(false); // Only set to false on error
