@@ -19,7 +19,10 @@ export const contentApi = {
 };
 
 export const playlistsApi = {
-  list: () => http(`/api/playlists`),
+  list: (params={}) => {
+    const qs = new URLSearchParams(params).toString();
+    return http(`/api/playlists${qs ? `?${qs}` : ""}`);
+  },
   get: (id) => http(`/api/playlists/${id}`),
   create: (payload) => http(`/api/playlists`, { method: "POST", body: JSON.stringify(payload) }),
   update: (id, payload) => http(`/api/playlists/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
@@ -27,10 +30,18 @@ export const playlistsApi = {
 };
 
 export const displaysApi = {
-  list: () => http(`/api/displays`),
+  list: (params={}) => {
+    const qs = new URLSearchParams(params).toString();
+    return http(`/api/displays${qs ? `?${qs}` : ""}`);
+  },
   get: (id) => http(`/api/displays/${id}`),
   create: (payload) => http(`/api/displays`, { method: "POST", body: JSON.stringify(payload) }),
   update: (id, payload) => http(`/api/displays/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
   remove: (id) => http(`/api/displays/${id}`, { method: "DELETE" }),
   activate: (id, playlistId) => http(`/api/displays/${id}/activate-playlist/${playlistId}`, { method: "PUT" }),
+};
+
+export const settingsApi = {
+  get: () => http(`/api/settings/display`),
+  update: (payload) => http(`/api/settings/display`, { method: "PUT", body: JSON.stringify(payload) }),
 };
