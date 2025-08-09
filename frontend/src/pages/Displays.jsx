@@ -323,7 +323,7 @@ export default function Displays() {
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-gray-400" />
                           <span className="text-gray-300">
-                            Refresh: {display.refresh_interval}s
+                            Refresh: {display.refresh_interval ?? 300}s
                           </span>
                         </div>
                         <div className="flex items-center gap-2">

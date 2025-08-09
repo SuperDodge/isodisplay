@@ -59,6 +59,7 @@ class Display(Base):
     background_color = Column(String, default="#000000")
     show_clock = Column(Boolean, default=False)
     clock_position = Column(String, default="top-right")
+    refresh_interval = Column(Integer, default=300)
 
     active_playlist = relationship("Playlist", lazy="joined", foreign_keys=[active_playlist_id])
 
@@ -69,3 +70,4 @@ class DisplaySettings(Base):
     background_color = Column(String, default="#000000")
     show_clock = Column(Boolean, default=False)
     clock_position = Column(String, default="top-right")
+    refresh_interval = Column(Integer, default=300)
