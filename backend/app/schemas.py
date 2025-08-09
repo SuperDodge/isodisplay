@@ -117,3 +117,7 @@ class DisplaySettingsUpdate(DisplaySettingsBase): pass
 class DisplaySettings(DisplaySettingsBase):
     id: str
     class Config: from_attributes = True
+
+# ---- File Upload ----
+class FileUploadResponse(BaseModel):
+    file_url: str
