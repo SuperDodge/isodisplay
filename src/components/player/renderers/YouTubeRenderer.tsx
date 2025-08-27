@@ -16,9 +16,9 @@ export function YouTubeRenderer({ item, onEnded }: YouTubeRendererProps) {
 
   useEffect(() => {
     // Extract video ID from metadata or URL
-    const videoId = item.content?.metadata?.videoId || 
-                   extractVideoIdFromUrl(item.content?.fileUrl || '');
-    
+    const videoId =
+      item.content?.metadata?.videoId || extractVideoIdFromUrl(item.content?.fileUrl || '');
+
     if (!videoId) {
       setError('No YouTube video ID found');
       return;
@@ -58,7 +58,7 @@ export function YouTubeRenderer({ item, onEnded }: YouTubeRendererProps) {
       console.log('YouTube container not ready');
       return;
     }
-    
+
     // Don't create if player already exists
     if (playerRef.current) {
       console.log('YouTube player already exists');
@@ -91,18 +91,21 @@ export function YouTubeRenderer({ item, onEnded }: YouTubeRendererProps) {
       events: {
         onReady: (event: any) => {
           setIsReady(true);
-          
+
           // Ensure video plays (fallback for autoplay issues)
           event.target.playVideo();
-          
+
           // Additional fallback: check if playing after a short delay
           setTimeout(() => {
-            if (playerRef.current && playerRef.current.getPlayerState() !== window.YT.PlayerState.PLAYING) {
+            if (
+              playerRef.current &&
+              playerRef.current.getPlayerState() !== window.YT.PlayerState.PLAYING
+            ) {
               console.log('YouTube video not playing, attempting to start again...');
               playerRef.current.playVideo();
             }
           }, 500);
-          
+
           // If we have a specific duration, set a timer
           if (!playFullVideo && duration > 0) {
             setTimeout(() => {
@@ -132,9 +135,9 @@ export function YouTubeRenderer({ item, onEnded }: YouTubeRendererProps) {
   const extractVideoIdFromUrl = (url: string): string | null => {
     const patterns = [
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-      /^([^&\n?#]+)$/ // Just the ID
+      /^([^&\n?#]+)$/, // Just the ID
     ];
-    
+
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match) return match[1];
@@ -155,16 +158,12 @@ export function YouTubeRenderer({ item, onEnded }: YouTubeRendererProps) {
 
   return (
     <div className="w-full h-full bg-black flex items-center justify-center">
-      <div 
+      <div
         ref={containerRef}
         className="w-full h-full"
         style={{ maxWidth: '100%', maxHeight: '100%' }}
       />
-      {!isReady && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black">
-          <div className="text-white">Loading YouTube video...</div>
-        </div>
-      )}
+      {!isReady && <div className="absolute inset-0 bg-black" />}
     </div>
   );
 }

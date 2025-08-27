@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, memo, useRef } from 'react';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import { TransitionEffect } from '@/types/playlist';
 import '@/styles/transitions.css';
 
@@ -9,44 +9,67 @@ interface TransitionContainerProps {
   children: ReactNode;
   transition: TransitionEffect;
   duration: number;
-  transitioning: boolean;
+  contentKey: string | number;
 }
 
 export const TransitionContainer = memo(function TransitionContainer({
   children,
   transition,
   duration,
-  transitioning,
+  contentKey,
 }: TransitionContainerProps) {
   const transitionClassNames = `transition-${transition}`;
-  const timeout = duration * 1000; // Convert to milliseconds
+  const timeout = duration * 1000;
   const nodeRef = useRef<HTMLDivElement>(null);
 
-  // Use simplified version without transitions for now
-  // TODO: Fix transitions with react-transition-group
-  return (
-    <div className="w-full h-full relative">
-      <div className="absolute inset-0">
-        {children}
+  // Set CSS variable for transition duration
+  const style = {
+    '--transition-duration': `${duration}s`,
+  } as React.CSSProperties;
+
+  // For instant transitions (cut), just render without animation
+  if (transition === 'cut') {
+    return (
+      <div className="relative w-full h-full gpu-accelerated">
+        <div className="absolute inset-0 gpu-transition">{children}</div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
-    <div className="relative w-full h-full gpu-accelerated">
-      <TransitionGroup component={null}>
+    <div
+      className="relative w-full h-full gpu-accelerated overflow-hidden"
+      style={{
+        perspective: '1200px',
+        transformStyle: 'preserve-3d',
+      }}
+    >
+      <SwitchTransition>
         <CSSTransition
-          key={transitioning ? 'next' : 'current'}
+          key={contentKey}
           timeout={timeout}
           classNames={transitionClassNames}
-          unmountOnExit
           nodeRef={nodeRef}
+          addEndListener={(done) => {
+            if (nodeRef.current) {
+              nodeRef.current.addEventListener('transitionend', done, false);
+            }
+          }}
         >
-          <div ref={nodeRef} className="absolute inset-0 gpu-transition">
+          <div
+            ref={nodeRef}
+            className="absolute inset-0"
+            style={{
+              ...style,
+              transformStyle: 'preserve-3d',
+              backfaceVisibility: 'hidden',
+              willChange: 'transform, opacity, filter',
+            }}
+          >
             {children}
           </div>
         </CSSTransition>
-      </TransitionGroup>
+      </SwitchTransition>
     </div>
   );
 });

@@ -153,22 +153,26 @@
 
 /* Morph */
 .transition-morph-enter {
-  transform: scale(0) rotate(180deg);
+  transform: scale(0) rotate(360deg);
+  transform-origin: 50% 50%;
   opacity: 0;
 }
 .transition-morph-enter-active {
   transform: scale(1) rotate(0deg);
+  transform-origin: 50% 50%;
   opacity: 1;
-  transition: all var(--transition-duration, 1s) ease-in-out;
+  transition: all var(--transition-duration, 1s) cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 .transition-morph-exit {
   transform: scale(1) rotate(0deg);
+  transform-origin: 50% 50%;
   opacity: 1;
 }
 .transition-morph-exit-active {
-  transform: scale(0) rotate(-180deg);
+  transform: scale(0) rotate(-360deg);
+  transform-origin: 50% 50%;
   opacity: 0;
-  transition: all var(--transition-duration, 1s) ease-in-out;
+  transition: all var(--transition-duration, 1s) cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 /* Burn */
@@ -227,22 +231,26 @@
 
 /* Peel */
 .transition-peel-enter {
-  transform: rotate3d(1, 1, 0, 90deg);
+  transform: perspective(1200px) rotateY(-90deg);
+  transform-origin: 0% 50%;
   opacity: 0;
 }
 .transition-peel-enter-active {
-  transform: rotate3d(1, 1, 0, 0deg);
+  transform: perspective(1200px) rotateY(0deg);
+  transform-origin: 0% 50%;
   opacity: 1;
-  transition: all var(--transition-duration, 1s) ease-in-out;
+  transition: all var(--transition-duration, 1s) cubic-bezier(0.4, 0, 0.2, 1);
 }
 .transition-peel-exit {
-  transform: rotate3d(1, 1, 0, 0deg);
+  transform: perspective(1200px) rotateY(0deg);
+  transform-origin: 100% 50%;
   opacity: 1;
 }
 .transition-peel-exit-active {
-  transform: rotate3d(1, 1, 0, -90deg);
+  transform: perspective(1200px) rotateY(90deg);
+  transform-origin: 100% 50%;
   opacity: 0;
-  transition: all var(--transition-duration, 1s) ease-in-out;
+  transition: all var(--transition-duration, 1s) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Quality-specific optimizations for Raspberry Pi */
