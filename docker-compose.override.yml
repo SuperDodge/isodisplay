@@ -1,0 +1,33 @@
+version: '3.8'
+
+# Development overrides
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: isodisplay_dev
+      POSTGRES_USER: isodisplay_dev
+      POSTGRES_PASSWORD: localdev
+
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://isodisplay_dev:localdev@postgres:5432/isodisplay_dev?schema=public
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: development-secret-change-in-production
+    ports:
+      - "3000:3000"
+    command: npm run dev
+
+  # In development, we don't need nginx
+  nginx:
+    profiles:
+      - production

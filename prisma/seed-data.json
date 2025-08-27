@@ -1,0 +1,443 @@
+{
+  "users": [
+    {
+      "id": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "email": "admin@isodisplay.local",
+      "username": "admin",
+      "firstName": null,
+      "lastName": null,
+      "password": "$2b$10$xr5CTly4kqQe8co.7zFgsu1jKr/zRQCzwiBdY6ApRECaM2/GciUCC",
+      "permissions": [
+        "USER_CONTROL",
+        "CONTENT_CREATE",
+        "CONTENT_DELETE",
+        "PLAYLIST_CREATE",
+        "PLAYLIST_ASSIGN",
+        "PLAYLIST_DELETE",
+        "DISPLAY_CONTROL",
+        "SYSTEM_SETTINGS"
+      ],
+      "status": "ACTIVE",
+      "createdAt": "2025-08-26T01:22:28.417Z",
+      "updatedAt": "2025-08-26T01:22:28.417Z"
+    },
+    {
+      "id": "12adc2d4-0d07-409a-a134-2960c5928723",
+      "email": "editor@isodisplay.local",
+      "username": "editor",
+      "firstName": null,
+      "lastName": null,
+      "password": "$2b$10$7CGbAuhIdJy4JFe0npzNeOxOCgWFOj.OXaO45WR0e0YpK5sB0nQtS",
+      "permissions": ["CONTENT_CREATE", "PLAYLIST_ASSIGN"],
+      "status": "ACTIVE",
+      "createdAt": "2025-08-26T01:22:28.481Z",
+      "updatedAt": "2025-08-26T01:22:28.481Z"
+    },
+    {
+      "id": "39aa96b5-0a62-43ea-bb64-e6374ed85cf3",
+      "email": "viewer@isodisplay.local",
+      "username": "viewer",
+      "firstName": null,
+      "lastName": null,
+      "password": "$2b$10$G0xcmpIDBF0kICkfzxvJ2eJQWVnx88an7/G4f6H1UGEBGZ5CZQYiW",
+      "permissions": ["PLAYLIST_ASSIGN"],
+      "status": "ACTIVE",
+      "createdAt": "2025-08-26T01:22:28.543Z",
+      "updatedAt": "2025-08-26T01:22:28.543Z"
+    }
+  ],
+  "content": [
+    {
+      "id": "6771e8c1-1dbd-4e20-a58e-1a29d351448c",
+      "name": "Isomer Brand Signature - Grey",
+      "type": "IMAGE",
+      "filePath": "/uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/1756150191867-1756150191858-Isomer Project Group-signature-for grey bg.png",
+      "metadata": {
+        "width": 1920,
+        "format": "png",
+        "height": 1080
+      },
+      "backgroundColor": "#000000",
+      "cropSettings": null,
+      "fileSize": "60502",
+      "mimeType": "image/png",
+      "originalName": "Isomer-signature-for grey bg.png",
+      "fileHash": null,
+      "processingStatus": "PENDING",
+      "processingError": null,
+      "storageLocation": null,
+      "uploadedBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "createdAt": "2025-08-26T01:22:28.555Z",
+      "updatedAt": "2025-08-26T01:27:28.842Z",
+      "deletedAt": null,
+      "createdBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "duration": null,
+      "fileName": "1756149885178-1756149885170-Isomer-signature-for grey bg.png",
+      "description": null,
+      "thumbnails": [
+        {
+          "id": "707f2d71-2e7c-4e54-8062-2c390f173a99",
+          "contentId": "6771e8c1-1dbd-4e20-a58e-1a29d351448c",
+          "size": "display",
+          "width": 640,
+          "height": 360,
+          "filePath": "uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/thumbnails/ddef019c-cceb-4748-a4f0-dc1b9cad3081/display-thumb.jpg",
+          "fileSize": "15519",
+          "format": "jpg",
+          "createdAt": "2025-08-26T01:32:41.154Z"
+        }
+      ]
+    },
+    {
+      "id": "858d9e5c-0bc6-4101-a54e-a5638ebabeb6",
+      "name": "Isomer Brand Signature - Orange",
+      "type": "IMAGE",
+      "filePath": "/uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/1756150245837-1756150245830-Isomer Project Group-signature-for orange bg.png",
+      "metadata": {
+        "width": 1920,
+        "format": "png",
+        "height": 1080
+      },
+      "backgroundColor": "#000000",
+      "cropSettings": null,
+      "fileSize": "68159",
+      "mimeType": "image/png",
+      "originalName": "Isomer-signature-for-orange-bg.png",
+      "fileHash": null,
+      "processingStatus": "PENDING",
+      "processingError": null,
+      "storageLocation": null,
+      "uploadedBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "createdAt": "2025-08-26T01:22:28.561Z",
+      "updatedAt": "2025-08-26T01:27:28.852Z",
+      "deletedAt": null,
+      "createdBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "duration": null,
+      "fileName": "1756149908424-1756149908417-Isomer-signature-for-orange-bg.png",
+      "description": null,
+      "thumbnails": [
+        {
+          "id": "8125544a-7670-491d-8ff8-afcd62805d40",
+          "contentId": "858d9e5c-0bc6-4101-a54e-a5638ebabeb6",
+          "size": "display",
+          "width": 640,
+          "height": 360,
+          "filePath": "uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/thumbnails/d6707d61-9c3b-4f48-a8fa-c64601ccb1f7/display-thumb.jpg",
+          "fileSize": "16018",
+          "format": "jpg",
+          "createdAt": "2025-08-26T01:32:41.161Z"
+        }
+      ]
+    },
+    {
+      "id": "0f700c0a-68b8-4631-9d56-ccebf5fb109f",
+      "name": "Isomer Brand Signature - White",
+      "type": "IMAGE",
+      "filePath": "/uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/1756150286390-1756150286383-Isomer Project Group-signature.png",
+      "metadata": {
+        "width": 1920,
+        "format": "png",
+        "height": 1080
+      },
+      "backgroundColor": "#000000",
+      "cropSettings": null,
+      "fileSize": "60418",
+      "mimeType": "image/png",
+      "originalName": "Isomer-signature-for-white-bg.png",
+      "fileHash": null,
+      "processingStatus": "PENDING",
+      "processingError": null,
+      "storageLocation": null,
+      "uploadedBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "createdAt": "2025-08-26T01:22:28.566Z",
+      "updatedAt": "2025-08-26T01:27:28.859Z",
+      "deletedAt": null,
+      "createdBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "duration": null,
+      "fileName": "1756149928369-1756149928362-Isomer-signature-for-white-bg.png",
+      "description": null,
+      "thumbnails": [
+        {
+          "id": "fa15bf63-9c24-4b05-bd3c-b242aa208938",
+          "contentId": "0f700c0a-68b8-4631-9d56-ccebf5fb109f",
+          "size": "display",
+          "width": 640,
+          "height": 360,
+          "filePath": "uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/thumbnails/bcaed1b9-8eaf-4925-a64c-9c900279d4ee/display-thumb.jpg",
+          "fileSize": "15847",
+          "format": "jpg",
+          "createdAt": "2025-08-26T01:32:41.168Z"
+        }
+      ]
+    },
+    {
+      "id": "fb163e2a-ec50-46df-aa06-e387e577a852",
+      "name": "Isomer Brandmark - Orange",
+      "type": "IMAGE",
+      "filePath": "/uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/1756150402192-1756150402185-Isomer Project Group-brandmark-for orange bg.png",
+      "metadata": {
+        "width": 1920,
+        "format": "png",
+        "height": 1080
+      },
+      "backgroundColor": "#000000",
+      "cropSettings": null,
+      "fileSize": "26093",
+      "mimeType": "image/png",
+      "originalName": "isomer-brandmark-for-orange-bg.png",
+      "fileHash": null,
+      "processingStatus": "PENDING",
+      "processingError": null,
+      "storageLocation": null,
+      "uploadedBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "createdAt": "2025-08-26T01:22:28.574Z",
+      "updatedAt": "2025-08-26T01:27:28.865Z",
+      "deletedAt": null,
+      "createdBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "duration": null,
+      "fileName": "1756149970194-1756149970187-isomer-brandmark-for-orange-bg.png",
+      "description": null,
+      "thumbnails": [
+        {
+          "id": "eb4a5247-53fc-4198-b514-9bbad4558f6a",
+          "contentId": "fb163e2a-ec50-46df-aa06-e387e577a852",
+          "size": "display",
+          "width": 640,
+          "height": 360,
+          "filePath": "uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/thumbnails/a624d16a-371a-40c5-8c9b-2bd70683c065/display-thumb.jpg",
+          "fileSize": "8273",
+          "format": "jpg",
+          "createdAt": "2025-08-26T01:32:41.177Z"
+        }
+      ]
+    },
+    {
+      "id": "b115a834-148c-4416-8ca1-0f2d59a79b52",
+      "name": "Isomer Brandmark - Grey",
+      "type": "IMAGE",
+      "filePath": "/uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/1756150430184-1756150430177-Isomer Project Group-brandmark-for grey bg.png",
+      "metadata": {
+        "width": 1920,
+        "format": "png",
+        "height": 1080
+      },
+      "backgroundColor": "#000000",
+      "cropSettings": null,
+      "fileSize": "18476",
+      "mimeType": "image/png",
+      "originalName": "isomer-brandmark-for-grey-bg.png",
+      "fileHash": null,
+      "processingStatus": "PENDING",
+      "processingError": null,
+      "storageLocation": null,
+      "uploadedBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "createdAt": "2025-08-26T01:22:28.581Z",
+      "updatedAt": "2025-08-26T01:27:28.872Z",
+      "deletedAt": null,
+      "createdBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "duration": null,
+      "fileName": "1756150064193-1756150064186-isomer-brandmark-for-grey-bg.png",
+      "description": null,
+      "thumbnails": [
+        {
+          "id": "08915139-5b7e-4e25-be53-58c37528a209",
+          "contentId": "b115a834-148c-4416-8ca1-0f2d59a79b52",
+          "size": "display",
+          "width": 640,
+          "height": 360,
+          "filePath": "uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/thumbnails/a98e6e4b-e566-41fb-9f8d-261363b7bde9/display-thumb.jpg",
+          "fileSize": "8010",
+          "format": "jpg",
+          "createdAt": "2025-08-26T01:32:41.186Z"
+        }
+      ]
+    },
+    {
+      "id": "83c9e1d6-1fed-40ca-9f10-b6d65f5382ad",
+      "name": "Isomer Brandmark - White",
+      "type": "IMAGE",
+      "filePath": "/uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/1756150454822-1756150454813-Isomer Project Group-brandmark.png",
+      "metadata": {
+        "width": 1920,
+        "format": "png",
+        "height": 1080
+      },
+      "backgroundColor": "#000000",
+      "cropSettings": null,
+      "fileSize": "18459",
+      "mimeType": "image/png",
+      "originalName": "isomer-brandmark-for-white-bg.png",
+      "fileHash": null,
+      "processingStatus": "PENDING",
+      "processingError": null,
+      "storageLocation": null,
+      "uploadedBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "createdAt": "2025-08-26T01:22:28.586Z",
+      "updatedAt": "2025-08-26T01:27:28.878Z",
+      "deletedAt": null,
+      "createdBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "duration": null,
+      "fileName": "1756150094209-1756150094202-isomer-brandmark-for-white-bg.png",
+      "description": null,
+      "thumbnails": [
+        {
+          "id": "cfe2c857-2e11-4ad1-b221-d3b99f3431eb",
+          "contentId": "83c9e1d6-1fed-40ca-9f10-b6d65f5382ad",
+          "size": "display",
+          "width": 640,
+          "height": 360,
+          "filePath": "uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/thumbnails/a8679771-5536-4e24-bf16-29192ad0fd7e/display-thumb.jpg",
+          "fileSize": "8084",
+          "format": "jpg",
+          "createdAt": "2025-08-26T01:32:41.192Z"
+        }
+      ]
+    },
+    {
+      "id": "e8985ab1-0f4d-4445-9719-aca427043550",
+      "name": "Team Photo - 2024",
+      "type": "IMAGE",
+      "filePath": "/uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/1756150131951-1756150131939-Isomer.jpg",
+      "metadata": {
+        "width": 5184,
+        "format": "jpeg",
+        "height": 3456
+      },
+      "backgroundColor": "#000000",
+      "cropSettings": null,
+      "fileSize": "5029604",
+      "mimeType": "image/jpeg",
+      "originalName": "Isomer-24-Team-P7074337.jpg",
+      "fileHash": null,
+      "processingStatus": "PENDING",
+      "processingError": null,
+      "storageLocation": null,
+      "uploadedBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "createdAt": "2025-08-26T01:22:28.549Z",
+      "updatedAt": "2025-08-26T01:30:53.273Z",
+      "deletedAt": null,
+      "createdBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "duration": null,
+      "fileName": "1756149827161-1756149827153-Isomer-24-Team-P7074337.jpg",
+      "description": null,
+      "thumbnails": [
+        {
+          "id": "3b6f6899-8d33-4c4a-afe9-cd3e497ce6a0",
+          "contentId": "e8985ab1-0f4d-4445-9719-aca427043550",
+          "size": "display",
+          "width": 640,
+          "height": 360,
+          "filePath": "uploads/2025/08/images/9117b6aa-e1be-4963-b0d8-85901401bd80/thumbnails/d42baffc-fa4b-4f69-bd1c-ffd524ac3ebc/display-thumb.jpg",
+          "fileSize": "49871",
+          "format": "jpg",
+          "createdAt": "2025-08-26T01:32:41.147Z"
+        }
+      ]
+    },
+    {
+      "id": "946b5f97-65e7-42c4-9622-84cc88d4bdf3",
+      "name": "We're #BuiltDifferent!",
+      "type": "YOUTUBE",
+      "filePath": "https://youtu.be/GLS0VkwGrRY",
+      "metadata": {
+        "source": "youtube",
+        "videoId": "GLS0VkwGrRY",
+        "embedUrl": "https://www.youtube.com/embed/GLS0VkwGrRY",
+        "thumbnailUrl": "https://i.ytimg.com/vi/GLS0VkwGrRY/hqdefault.jpg",
+        "playFullVideo": true,
+        "customDuration": null,
+        "actualVideoDuration": 78
+      },
+      "backgroundColor": null,
+      "cropSettings": null,
+      "fileSize": null,
+      "mimeType": "video/youtube",
+      "originalName": null,
+      "fileHash": null,
+      "processingStatus": "COMPLETED",
+      "processingError": null,
+      "storageLocation": null,
+      "uploadedBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "createdAt": "2025-08-26T01:31:40.271Z",
+      "updatedAt": "2025-08-26T01:31:40.271Z",
+      "deletedAt": null,
+      "createdBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "duration": 78,
+      "fileName": null,
+      "description": "We’re #BuiltDifferent! \n\nListen as our team members share their favorite things about working at Isomer, from the collaborative spirit to the exciting projects. Check out what makes Isomer a special place to work!\n\n#IsomerCulture #LifeAtIsomer #worklife #engineering #epc",
+      "thumbnails": []
+    }
+  ],
+  "playlists": [
+    {
+      "id": "a65d0c4f-c66d-4c44-beb8-683c934ccef7",
+      "name": "Default Lobby Playlist",
+      "createdBy": "975c4d27-12ac-42f5-a62c-733af0797aa7",
+      "isActive": true,
+      "createdAt": "2025-08-26T01:23:14.131Z",
+      "updatedAt": "2025-08-26T01:44:17.428Z",
+      "description": "Playlist for testing thumbnail display",
+      "items": [
+        {
+          "id": "2eef00c0-63de-449c-b8a7-cc760cc73765",
+          "playlistId": "a65d0c4f-c66d-4c44-beb8-683c934ccef7",
+          "contentId": "6771e8c1-1dbd-4e20-a58e-1a29d351448c",
+          "duration": 10,
+          "order": 0,
+          "transitionType": "FADE",
+          "transitionDuration": 1000,
+          "createdAt": "2025-08-26T01:44:17.439Z",
+          "updatedAt": "2025-08-26T01:44:17.439Z"
+        },
+        {
+          "id": "d63a7216-71dc-4e59-82c7-1313035e381b",
+          "playlistId": "a65d0c4f-c66d-4c44-beb8-683c934ccef7",
+          "contentId": "946b5f97-65e7-42c4-9622-84cc88d4bdf3",
+          "duration": 78,
+          "order": 1,
+          "transitionType": "FADE",
+          "transitionDuration": 1000,
+          "createdAt": "2025-08-26T01:44:17.439Z",
+          "updatedAt": "2025-08-26T01:44:17.439Z"
+        },
+        {
+          "id": "ba8c3c10-89ff-4818-b92c-5d44aa5311da",
+          "playlistId": "a65d0c4f-c66d-4c44-beb8-683c934ccef7",
+          "contentId": "fb163e2a-ec50-46df-aa06-e387e577a852",
+          "duration": 10,
+          "order": 2,
+          "transitionType": "FADE",
+          "transitionDuration": 1000,
+          "createdAt": "2025-08-26T01:44:17.439Z",
+          "updatedAt": "2025-08-26T01:44:17.439Z"
+        },
+        {
+          "id": "a4951cbb-8ad4-47ef-a9c9-b2c99e85f7b0",
+          "playlistId": "a65d0c4f-c66d-4c44-beb8-683c934ccef7",
+          "contentId": "e8985ab1-0f4d-4445-9719-aca427043550",
+          "duration": 10,
+          "order": 3,
+          "transitionType": "FADE",
+          "transitionDuration": 1000,
+          "createdAt": "2025-08-26T01:44:17.439Z",
+          "updatedAt": "2025-08-26T01:44:17.439Z"
+        }
+      ]
+    }
+  ],
+  "displays": [
+    {
+      "id": "2e52a329-a8e3-4af4-9026-12f61eff7ccb",
+      "name": "Lobby Screen",
+      "urlSlug": "FHLeBpn7NU",
+      "playlistId": "a65d0c4f-c66d-4c44-beb8-683c934ccef7",
+      "resolution": "3840x2160",
+      "orientation": "LANDSCAPE",
+      "lastSeen": null,
+      "isOnline": false,
+      "location": "",
+      "createdAt": "2025-08-26T01:44:35.127Z",
+      "updatedAt": "2025-08-26T01:44:35.127Z"
+    }
+  ]
+}

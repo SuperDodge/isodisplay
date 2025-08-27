@@ -1,0 +1,48 @@
+/* Brand Font Definitions */
+
+/* Made Tommy Bold - For H1 headings and primary branding */
+@font-face {
+  font-family: 'Made Tommy';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src:
+    url('/fonts/madetommy_bold/made_tommy_bold-webfont.woff2') format('woff2'),
+    url('/fonts/madetommy_bold/made_tommy_bold-webfont.woff') format('woff');
+}
+
+/* Made Tommy Thin - For H2 headings and secondary headers */
+@font-face {
+  font-family: 'Made Tommy';
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+  src:
+    url('/fonts/madetommy_thin/made_tommy_thin-webfont.woff2') format('woff2'),
+    url('/fonts/madetommy_thin/made_tommy_thin-webfont.woff') format('woff');
+}
+
+/* Metropolis Regular - For body text and general content */
+@font-face {
+  font-family: 'Metropolis';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src:
+    url('/fonts/metropolis_regular/Metropolis-Regular.woff2') format('woff2'),
+    url('/fonts/metropolis_regular/Metropolis-Regular.woff') format('woff');
+}
+
+/* Metropolis Regular Italic - For emphasized body text */
+@font-face {
+  font-family: 'Metropolis';
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  src:
+    url('/fonts/metropolis_regular_italic/Metropolis-RegularItalic.woff2') format('woff2'),
+    url('/fonts/metropolis_regular_italic/Metropolis-RegularItalic.woff') format('woff');
+}
+
+/* For Metropolis Extra Bold (800 weight) - synthesize from Regular with browser bold */
+/* This allows the browser to create a bolder version for H3 and navigation */

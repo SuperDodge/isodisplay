@@ -1,0 +1,356 @@
+/* Fade Transition */
+.transition-fade-enter {
+  opacity: 0;
+}
+.transition-fade-enter-active {
+  opacity: 1;
+  transition: opacity var(--transition-duration, 1s) ease-in-out;
+}
+.transition-fade-exit {
+  opacity: 1;
+}
+.transition-fade-exit-active {
+  opacity: 0;
+  transition: opacity var(--transition-duration, 1s) ease-in-out;
+}
+
+/* Crossfade (similar to fade but overlapping) */
+.transition-crossfade-enter {
+  opacity: 0;
+  z-index: 2;
+}
+.transition-crossfade-enter-active {
+  opacity: 1;
+  transition: opacity var(--transition-duration, 1s) ease-in-out;
+}
+.transition-crossfade-exit {
+  opacity: 1;
+  z-index: 1;
+}
+.transition-crossfade-exit-active {
+  opacity: 0;
+  transition: opacity var(--transition-duration, 1s) ease-in-out;
+}
+
+/* Cut (instant) */
+.transition-cut-enter {
+  opacity: 1;
+}
+.transition-cut-enter-active {
+  opacity: 1;
+}
+.transition-cut-exit {
+  opacity: 0;
+}
+.transition-cut-exit-active {
+  opacity: 0;
+}
+
+/* Dissolve */
+.transition-dissolve-enter {
+  opacity: 0;
+  filter: blur(10px);
+}
+.transition-dissolve-enter-active {
+  opacity: 1;
+  filter: blur(0);
+  transition: all var(--transition-duration, 1s) ease-in-out;
+}
+.transition-dissolve-exit {
+  opacity: 1;
+  filter: blur(0);
+}
+.transition-dissolve-exit-active {
+  opacity: 0;
+  filter: blur(10px);
+  transition: all var(--transition-duration, 1s) ease-in-out;
+}
+
+/* Wipe (left to right) */
+.transition-wipe-enter {
+  clip-path: inset(0 100% 0 0);
+}
+.transition-wipe-enter-active {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path var(--transition-duration, 1s) ease-in-out;
+}
+.transition-wipe-exit {
+  clip-path: inset(0 0 0 0);
+}
+.transition-wipe-exit-active {
+  clip-path: inset(0 0 0 100%);
+  transition: clip-path var(--transition-duration, 1s) ease-in-out;
+}
+
+/* Zoom */
+.transition-zoom-enter {
+  transform: scale(0);
+  opacity: 0;
+}
+.transition-zoom-enter-active {
+  transform: scale(1);
+  opacity: 1;
+  transition: all var(--transition-duration, 1s) ease-in-out;
+}
+.transition-zoom-exit {
+  transform: scale(1);
+  opacity: 1;
+}
+.transition-zoom-exit-active {
+  transform: scale(2);
+  opacity: 0;
+  transition: all var(--transition-duration, 1s) ease-in-out;
+}
+
+/* Push (from right) */
+.transition-push-enter {
+  transform: translateX(100%);
+}
+.transition-push-enter-active {
+  transform: translateX(0);
+  transition: transform var(--transition-duration, 1s) ease-in-out;
+}
+.transition-push-exit {
+  transform: translateX(0);
+}
+.transition-push-exit-active {
+  transform: translateX(-100%);
+  transition: transform var(--transition-duration, 1s) ease-in-out;
+}
+
+/* Slide Over */
+.transition-slide-over-enter {
+  transform: translateX(100%);
+  z-index: 2;
+}
+.transition-slide-over-enter-active {
+  transform: translateX(0);
+  transition: transform var(--transition-duration, 1s) ease-in-out;
+}
+.transition-slide-over-exit {
+  transform: translateX(0);
+  z-index: 1;
+}
+.transition-slide-over-exit-active {
+  transform: translateX(0);
+}
+
+/* Iris */
+.transition-iris-enter {
+  clip-path: circle(0% at 50% 50%);
+}
+.transition-iris-enter-active {
+  clip-path: circle(100% at 50% 50%);
+  transition: clip-path var(--transition-duration, 1s) ease-in-out;
+}
+.transition-iris-exit {
+  clip-path: circle(100% at 50% 50%);
+}
+.transition-iris-exit-active {
+  clip-path: circle(0% at 50% 50%);
+  transition: clip-path var(--transition-duration, 1s) ease-in-out;
+}
+
+/* Morph */
+.transition-morph-enter {
+  transform: scale(0) rotate(180deg);
+  opacity: 0;
+}
+.transition-morph-enter-active {
+  transform: scale(1) rotate(0deg);
+  opacity: 1;
+  transition: all var(--transition-duration, 1s) ease-in-out;
+}
+.transition-morph-exit {
+  transform: scale(1) rotate(0deg);
+  opacity: 1;
+}
+.transition-morph-exit-active {
+  transform: scale(0) rotate(-180deg);
+  opacity: 0;
+  transition: all var(--transition-duration, 1s) ease-in-out;
+}
+
+/* Burn */
+.transition-burn-enter {
+  filter: brightness(0) contrast(100);
+}
+.transition-burn-enter-active {
+  filter: brightness(1) contrast(1);
+  transition: filter var(--transition-duration, 1s) ease-in-out;
+}
+.transition-burn-exit {
+  filter: brightness(1) contrast(1);
+}
+.transition-burn-exit-active {
+  filter: brightness(2) contrast(100);
+  transition: filter var(--transition-duration, 1s) ease-in-out;
+}
+
+/* Barn Doors */
+.transition-barn-doors-enter {
+  clip-path: inset(0 50% 0 50%);
+}
+.transition-barn-doors-enter-active {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path var(--transition-duration, 1s) ease-in-out;
+}
+.transition-barn-doors-exit {
+  clip-path: inset(0 0 0 0);
+}
+.transition-barn-doors-exit-active {
+  clip-path: inset(0 50% 0 50%);
+  transition: clip-path var(--transition-duration, 1s) ease-in-out;
+}
+
+/* Page Roll */
+.transition-page-roll-enter {
+  transform: rotateY(-90deg);
+  transform-origin: left center;
+  opacity: 0;
+}
+.transition-page-roll-enter-active {
+  transform: rotateY(0deg);
+  opacity: 1;
+  transition: all var(--transition-duration, 1s) ease-in-out;
+}
+.transition-page-roll-exit {
+  transform: rotateY(0deg);
+  transform-origin: right center;
+  opacity: 1;
+}
+.transition-page-roll-exit-active {
+  transform: rotateY(90deg);
+  opacity: 0;
+  transition: all var(--transition-duration, 1s) ease-in-out;
+}
+
+/* Peel */
+.transition-peel-enter {
+  transform: rotate3d(1, 1, 0, 90deg);
+  opacity: 0;
+}
+.transition-peel-enter-active {
+  transform: rotate3d(1, 1, 0, 0deg);
+  opacity: 1;
+  transition: all var(--transition-duration, 1s) ease-in-out;
+}
+.transition-peel-exit {
+  transform: rotate3d(1, 1, 0, 0deg);
+  opacity: 1;
+}
+.transition-peel-exit-active {
+  transform: rotate3d(1, 1, 0, -90deg);
+  opacity: 0;
+  transition: all var(--transition-duration, 1s) ease-in-out;
+}
+
+/* Quality-specific optimizations for Raspberry Pi */
+.quality-low .transition-dissolve-enter,
+.quality-low .transition-dissolve-enter-active,
+.quality-low .transition-dissolve-exit,
+.quality-low .transition-dissolve-exit-active {
+  filter: none !important;
+}
+
+.quality-low .transition-burn-enter,
+.quality-low .transition-burn-enter-active,
+.quality-low .transition-burn-exit,
+.quality-low .transition-burn-exit-active {
+  filter: brightness(1) contrast(1) !important;
+}
+
+.quality-medium .transition-dissolve-enter,
+.quality-medium .transition-dissolve-enter-active,
+.quality-medium .transition-dissolve-exit,
+.quality-medium .transition-dissolve-exit-active {
+  filter: blur(5px) !important;
+}
+
+/* Faster transitions for low quality mode */
+.quality-low * {
+  transition-duration: 0.2s !important;
+}
+
+.quality-medium * {
+  transition-duration: 0.5s !important;
+}
+
+/* Use 3D transforms for GPU acceleration */
+.transition-push-enter {
+  transform: translate3d(100%, 0, 0);
+}
+.transition-push-enter-active {
+  transform: translate3d(0, 0, 0);
+}
+.transition-push-exit {
+  transform: translate3d(0, 0, 0);
+}
+.transition-push-exit-active {
+  transform: translate3d(-100%, 0, 0);
+}
+
+.transition-slide-over-enter {
+  transform: translate3d(100%, 0, 0);
+}
+.transition-slide-over-enter-active {
+  transform: translate3d(0, 0, 0);
+}
+
+/* Hardware acceleration optimization */
+.transition-fade-enter,
+.transition-fade-enter-active,
+.transition-fade-exit,
+.transition-fade-exit-active,
+.transition-crossfade-enter,
+.transition-crossfade-enter-active,
+.transition-crossfade-exit,
+.transition-crossfade-exit-active,
+.transition-dissolve-enter,
+.transition-dissolve-enter-active,
+.transition-dissolve-exit,
+.transition-dissolve-exit-active,
+.transition-wipe-enter,
+.transition-wipe-enter-active,
+.transition-wipe-exit,
+.transition-wipe-exit-active,
+.transition-zoom-enter,
+.transition-zoom-enter-active,
+.transition-zoom-exit,
+.transition-zoom-exit-active,
+.transition-push-enter,
+.transition-push-enter-active,
+.transition-push-exit,
+.transition-push-exit-active,
+.transition-slide-over-enter,
+.transition-slide-over-enter-active,
+.transition-slide-over-exit,
+.transition-slide-over-exit-active,
+.transition-iris-enter,
+.transition-iris-enter-active,
+.transition-iris-exit,
+.transition-iris-exit-active,
+.transition-morph-enter,
+.transition-morph-enter-active,
+.transition-morph-exit,
+.transition-morph-exit-active,
+.transition-burn-enter,
+.transition-burn-enter-active,
+.transition-burn-exit,
+.transition-burn-exit-active,
+.transition-barn-doors-enter,
+.transition-barn-doors-enter-active,
+.transition-barn-doors-exit,
+.transition-barn-doors-exit-active,
+.transition-page-roll-enter,
+.transition-page-roll-enter-active,
+.transition-page-roll-exit,
+.transition-page-roll-exit-active,
+.transition-peel-enter,
+.transition-peel-enter-active,
+.transition-peel-exit,
+.transition-peel-exit-active {
+  will-change: transform, opacity, filter, clip-path;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}

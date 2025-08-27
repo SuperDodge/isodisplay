@@ -1,0 +1,26 @@
+The IsoDisplay app will be used as an internal tool by my Engineering and Project Management company, Isomer Project Group.
+
+The tool will need to be containerized so that it can be run as part of a single portainer stack on our TrueNAS system.
+
+The tool should be built using react/next.js.  The database should leverage PostgreSQL.  Opensource libraries should be used with a priority on simplicity and a small footprint for the other functions as needed.
+
+The app's function is to provide content for display on multiple tvs throughout our offices.  The content needs to be easily uploaded and playlists need to be easily changed by multiple users through a web interface.
+
+Here is an outline of the functionality of the device.
+
+Content is added to a library.  The content can be uploaded images, pdf files, powerpoint files, uploaded videos, urls, youtube embeds or text pages.
+	-All content is setup for 16:9 screens
+	-acceptable image formats should include at a minimum jpg, png, gif, heic, webp, svg
+	-Images can be transparent and should have the ability to define a background color
+	-pdf files may need to be cropped/zoomed and that should be possible in app
+	-powerpoint files should be converted to pdf and then croppable/zoomable
+	-acceptable video formats should include at a minimum mp4
+
+Playlists are created be selecting content from a library.  Each piece of content is assigned a duration that it is on screen and transition effects between pieces of content can be selected.
+	-transitions available should at a minimum be cut, fade, crossfade, dissolve, wipe, zoom, push, slide-over, iris, morph, burn, barn doors, page roll, peel
+
+A display is created in the application for each screen that is going to show content.  A custom url is created for each display.  Each screen is assigned a playlist in the user interface to control what shows on that screen.
+
+There also needs to be a user control screen where users can be added and given permissions.  There are is a content creation permission, a playlist assignment permission and a user control permission.
+
+We will install raspberry pis running a lightweight chromium interface to run the urls on full screen mode on each display.

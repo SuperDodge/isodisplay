@@ -1,0 +1,91 @@
+version: '3.8'
+
+# Portainer Stack Configuration for TrueNAS Deployment
+# This file is optimized for Portainer deployment with explicit paths
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: isodisplay-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-isodisplay}
+      POSTGRES_USER: ${POSTGRES_USER:-isodisplay}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      # TrueNAS volume mount - adjust path as needed
+      - /mnt/tank/appdata/isodisplay/postgres:/var/lib/postgresql/data
+    networks:
+      - isodisplay-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-isodisplay}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "com.portainer.stack=isodisplay"
+      - "com.portainer.service=database"
+
+  # Next.js Application
+  nextjs:
+    image: isodisplay:latest
+    container_name: isodisplay-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-isodisplay}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-isodisplay}?schema=public
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      FILE_STORAGE_PATH: /app/uploads
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-104857600}
+    volumes:
+      # TrueNAS volume mounts - adjust paths as needed
+      - /mnt/tank/appdata/isodisplay/uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - isodisplay-network
+    expose:
+      - "3000"
+    labels:
+      - "com.portainer.stack=isodisplay"
+      - "com.portainer.service=application"
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: isodisplay-proxy
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      # TrueNAS volume mounts - adjust paths as needed
+      - /mnt/tank/appdata/isodisplay/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /mnt/tank/appdata/isodisplay/nginx/conf.d:/etc/nginx/conf.d:ro
+      - /mnt/tank/appdata/isodisplay/nginx/ssl:/etc/nginx/ssl:ro
+      - /mnt/tank/appdata/isodisplay/nginx/cache:/var/cache/nginx
+    depends_on:
+      - nextjs
+    networks:
+      - isodisplay-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.portainer.stack=isodisplay"
+      - "com.portainer.service=proxy"
+      - "traefik.enable=true"
+      - "traefik.http.routers.isodisplay.rule=Host(`${DOMAIN_NAME}`)"
+      - "traefik.http.services.isodisplay.loadbalancer.server.port=80"
+
+networks:
+  isodisplay-network:
+    external: false
+    driver: bridge
+    labels:
+      - "com.portainer.stack=isodisplay"

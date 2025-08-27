@@ -1,0 +1,259 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String        @id @default(uuid())
+  username        String        @unique
+  email           String        @unique
+  password        String
+  firstName       String?
+  lastName        String?
+  status          UserStatus    @default(ACTIVE)
+  permissions     Permission[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  lastLogin       DateTime?
+  content         Content[]
+  fileVersions    FileVersion[]
+  playlists       Playlist[]
+  sharedPlaylists Playlist[]    @relation("SharedPlaylists")
+
+  @@index([email])
+  @@index([username])
+  @@index([status])
+}
+
+model Content {
+  id               String           @id @default(uuid())
+  name             String
+  type             ContentType
+  filePath         String?
+  metadata         Json?
+  backgroundColor  String?
+  cropSettings     Json?
+  fileSize         BigInt?
+  mimeType         String?
+  originalName     String?
+  fileHash         String?
+  processingStatus ProcessingStatus @default(PENDING)
+  processingError  String?
+  storageLocation  String?
+  uploadedBy       String
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  deletedAt        DateTime?
+  createdBy        String?
+  duration         Int?
+  fileName         String?
+  description      String?
+  uploadedByUser   User             @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+  thumbnails       FileThumbnail[]
+  versions         FileVersion[]
+  playlistItems    PlaylistItem[]
+  viewLogs         ViewLog[]
+
+  @@index([type])
+  @@index([createdAt])
+  @@index([uploadedBy])
+  @@index([fileHash])
+  @@index([processingStatus])
+}
+
+model Playlist {
+  id          String         @id @default(uuid())
+  name        String
+  createdBy   String
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  description String?
+  displays    Display[]
+  creator     User           @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  items       PlaylistItem[]
+  viewLogs    ViewLog[]
+  tags        Tag[]          @relation("PlaylistTags")
+  sharedWith  User[]         @relation("SharedPlaylists")
+
+  @@index([createdBy])
+  @@index([isActive])
+}
+
+model PlaylistItem {
+  id                 String         @id @default(uuid())
+  playlistId         String
+  contentId          String
+  duration           Int
+  order              Int
+  transitionType     TransitionType @default(CUT)
+  transitionDuration Int?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  content            Content        @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  playlist           Playlist       @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, order])
+  @@index([playlistId, order])
+}
+
+model Display {
+  id          String             @id @default(uuid())
+  name        String
+  urlSlug     String             @unique
+  playlistId  String?
+  resolution  String             @default("1920x1080")
+  orientation DisplayOrientation @default(LANDSCAPE)
+  lastSeen    DateTime?
+  isOnline    Boolean            @default(false)
+  location    String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  playlist    Playlist?          @relation(fields: [playlistId], references: [id])
+  errorLogs   ErrorLog[]
+  viewLogs    ViewLog[]
+
+  @@index([urlSlug])
+  @@index([isOnline])
+  @@index([playlistId])
+}
+
+model FileThumbnail {
+  id        String   @id @default(uuid())
+  contentId String
+  size      String
+  width     Int
+  height    Int
+  filePath  String
+  fileSize  BigInt
+  format    String
+  createdAt DateTime @default(now())
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@unique([contentId, size])
+  @@index([contentId])
+}
+
+model FileVersion {
+  id           String   @id @default(uuid())
+  contentId    String
+  version      Int
+  filePath     String
+  fileSize     BigInt
+  fileHash     String
+  changes      String?
+  uploadedById String
+  createdAt    DateTime @default(now())
+  content      Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+
+  @@unique([contentId, version])
+  @@index([contentId])
+}
+
+model ErrorLog {
+  id        String   @id @default(uuid())
+  displayId String
+  errorType String
+  message   String
+  stack     String?
+  metadata  String?
+  userAgent String?
+  url       String?
+  timestamp DateTime
+  createdAt DateTime @default(now())
+  display   Display  @relation(fields: [displayId], references: [id], onDelete: Cascade)
+
+  @@index([displayId])
+  @@index([errorType])
+  @@index([timestamp])
+}
+
+model ViewLog {
+  id               String   @id @default(uuid())
+  displayId        String
+  playlistId       String
+  contentId        String
+  viewedAt         DateTime @default(now())
+  duration         Int
+  expectedDuration Int
+  completed        Boolean
+  skipped          Boolean  @default(false)
+  content          Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  display          Display  @relation(fields: [displayId], references: [id], onDelete: Cascade)
+  playlist         Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@index([displayId])
+  @@index([playlistId])
+  @@index([contentId])
+  @@index([viewedAt])
+}
+
+model Tag {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  createdAt DateTime   @default(now())
+  playlists Playlist[] @relation("PlaylistTags")
+
+  @@index([name])
+}
+
+enum Permission {
+  CONTENT_CREATE
+  PLAYLIST_ASSIGN
+  USER_CONTROL
+  CONTENT_DELETE
+  PLAYLIST_CREATE
+  PLAYLIST_DELETE
+  DISPLAY_CONTROL
+  SYSTEM_SETTINGS
+}
+
+enum ContentType {
+  IMAGE
+  VIDEO
+  PDF
+  URL
+  YOUTUBE
+  TEXT
+}
+
+enum TransitionType {
+  CUT
+  FADE
+  CROSSFADE
+  DISSOLVE
+  WIPE
+  ZOOM
+  PUSH
+  SLIDE_OVER
+  IRIS
+  MORPH
+  BURN
+  BARN_DOORS
+  PAGE_ROLL
+  PEEL
+}
+
+enum DisplayOrientation {
+  LANDSCAPE
+  PORTRAIT
+}
+
+enum ProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}

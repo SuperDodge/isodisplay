@@ -1,0 +1,139 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Initialize Next.js Project with Docker Configuration",
+        "description": "Create the foundational Next.js application with TypeScript support and Docker containerization for deployment on TrueNAS/Portainer",
+        "details": "Initialize a new Next.js 14+ project with TypeScript and App Router. Create Dockerfile with multi-stage build (node:18-alpine base). Configure docker-compose.yml with Next.js app, PostgreSQL database, and nginx reverse proxy. Set up environment variables for database connection, file storage paths, and API keys. Include .dockerignore and optimize for production builds. Configure Portainer stack compatibility with proper networking and volume mounts.",
+        "testStrategy": "Verify Docker containers build successfully, Next.js development server starts, and basic routing works. Test production build and container deployment locally before TrueNAS deployment.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Setup PostgreSQL Database Schema and ORM",
+        "description": "Design and implement the database schema for users, content library, playlists, and displays with proper relationships",
+        "details": "Use Prisma ORM for type-safe database operations. Create schema with tables: users (id, username, email, permissions), content (id, name, type, file_path, metadata, background_color, crop_settings), playlists (id, name, created_by), playlist_items (playlist_id, content_id, duration, order, transition_type), displays (id, name, url_slug, playlist_id). Set up database migrations, seed scripts, and connection pooling. Configure proper foreign key constraints and indexes for performance.",
+        "testStrategy": "Run database migrations successfully, verify all relationships work correctly, test CRUD operations through Prisma client, and validate schema constraints.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Implement User Authentication and Authorization System",
+        "description": "Create secure user management with role-based permissions for content creation, playlist assignment, and user control",
+        "details": "Implement NextAuth.js with credentials provider for local authentication. Create middleware for route protection and permission checking. Define three permission levels: CONTENT_CREATE, PLAYLIST_ASSIGN, USER_CONTROL. Build login/logout pages with session management. Create user management interface for admins to add users and assign permissions. Use bcrypt for password hashing and JWT for session tokens. Include password reset functionality.",
+        "testStrategy": "Test user registration, login/logout flows, permission-based access control, and session persistence. Verify middleware blocks unauthorized access and permissions work correctly across all user types.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Build File Upload and Content Management System",
+        "description": "Create robust file upload system supporting images, videos, PDFs, PowerPoint files, and URLs with proper validation and storage",
+        "details": "Implement multer-based file upload with support for jpg, png, gif, heic, webp, svg, mp4 formats. Use sharp for image processing and ffmpeg for video thumbnails. Convert PowerPoint files to PDF using libre-office headless. Create file validation, virus scanning, and size limits. Store files in Docker volumes with organized directory structure. Build content library interface with grid/list views, search, filtering, and metadata editing. Include background color picker for transparent images.",
+        "testStrategy": "Test file upload for all supported formats, verify file validation works, test PowerPoint to PDF conversion, and ensure proper error handling for invalid files. Validate storage organization and retrieval.",
+        "priority": "high",
+        "dependencies": [
+          3
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Develop PDF and Content Cropping/Zooming Interface",
+        "description": "Create interactive cropping and zooming tools for PDF files and PowerPoint conversions with real-time preview",
+        "details": "Build React component using react-crop or similar library for interactive cropping. Implement PDF.js for PDF rendering and manipulation. Create zoom controls with percentage inputs and preset ratios. Store crop/zoom settings as JSON metadata in database. Build real-time preview system showing how content will appear on 16:9 displays. Include reset and undo functionality. Support multi-page PDF navigation and individual page cropping.",
+        "testStrategy": "Test cropping interface responsiveness, verify crop settings persist correctly, validate PDF rendering performance, and ensure 16:9 aspect ratio compliance across different content types.",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Create Playlist Management System",
+        "description": "Build comprehensive playlist creation and management interface with drag-and-drop ordering, duration settings, and transition effects",
+        "details": "Implement react-beautiful-dnd for drag-and-drop playlist ordering. Create playlist builder with content library sidebar, duration input fields (seconds), and transition effect dropdowns. Support transitions: cut, fade, crossfade, dissolve, wipe, zoom, push, slide-over, iris, morph, burn, barn doors, page roll, peel. Include playlist preview functionality and total duration calculation. Build playlist sharing and duplication features. Add bulk operations for adding multiple content items.",
+        "testStrategy": "Test drag-and-drop functionality, verify transition effects work correctly, validate duration calculations, and ensure playlist data persists properly. Test playlist preview and sharing features.",
+        "priority": "high",
+        "dependencies": [
+          5
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Implement Display Management and URL Generation",
+        "description": "Create display configuration system with unique URL generation for each screen and playlist assignment interface",
+        "details": "Build display management interface for adding/editing displays with unique names and auto-generated URL slugs. Create secure URL generation using UUIDs or nanoids. Implement playlist assignment dropdown with live preview. Build display status monitoring and last-seen tracking. Create QR code generation for easy Raspberry Pi setup. Include display resolution settings and orientation options. Add bulk display creation for multiple screens.",
+        "testStrategy": "Test unique URL generation, verify playlist assignment updates displays in real-time, validate QR code generation, and ensure display status tracking works correctly.",
+        "priority": "high",
+        "dependencies": [
+          6
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Build Display Player Interface with Transition Effects",
+        "description": "Create the full-screen display player that renders playlists with smooth transitions and content rotation",
+        "details": "Build React-based display player with full-screen capability and keyboard shortcuts (F11, ESC). Implement all transition effects using CSS animations and react-transition-group. Support auto-rotation based on playlist item durations. Handle different content types: images with background colors, videos with autoplay, PDFs with proper scaling, URLs in iframes, YouTube embeds, and text pages. Include error handling for missing content and network issues. Add websocket support for real-time playlist updates.",
+        "testStrategy": "Test all transition effects, verify timing accuracy, validate content rendering across all supported formats, and ensure smooth playback on Raspberry Pi hardware. Test websocket connectivity and real-time updates.",
+        "priority": "high",
+        "dependencies": [
+          7
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Create Admin Dashboard and Analytics",
+        "description": "Build comprehensive admin dashboard with user management, system monitoring, and playlist analytics",
+        "details": "Create admin dashboard with user management (add/edit/delete users, assign permissions), system health monitoring (database status, file storage usage, active displays), and playlist analytics (content view counts, playlist performance). Build audit logging for user actions and system events. Include bulk operations for content management and display configuration. Create backup/restore functionality for critical data. Add system settings for default durations, file size limits, and supported formats.",
+        "testStrategy": "Test user management operations, verify analytics data accuracy, validate audit logging functionality, and ensure backup/restore processes work correctly. Test system monitoring alerts and notifications.",
+        "priority": "medium",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Optimize for Raspberry Pi Deployment and Performance",
+        "description": "Optimize the application for Raspberry Pi hardware with lightweight rendering, caching, and offline functionality",
+        "details": "Implement service worker for offline playlist caching and content preloading. Optimize bundle size using Next.js dynamic imports and code splitting. Create Raspberry Pi specific configurations for hardware acceleration and memory management. Build content preloading system to cache next items in playlist. Implement graceful degradation for network interruptions. Create Pi setup scripts and documentation for kiosk mode configuration. Add performance monitoring and error reporting specific to Pi deployment.",
+        "testStrategy": "Test performance on actual Raspberry Pi hardware, verify offline functionality works correctly, validate memory usage stays within Pi limitations, and ensure smooth content playback at 60fps on 1080p displays.",
+        "priority": "medium",
+        "dependencies": [
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-20T01:39:42.006Z",
+      "updated": "2025-08-20T04:26:43.194Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "isodisplay-deployment",
+  "description": "Webhook for automated IsoDisplay deployment",
+  "stack_id": "isodisplay",
+  "webhook_url": "https://your-portainer-url/api/webhooks/YOUR_WEBHOOK_TOKEN",
+  "environment_variables": {
+    "POSTGRES_PASSWORD": "{{POSTGRES_PASSWORD}}",
+    "NEXTAUTH_URL": "{{NEXTAUTH_URL}}",
+    "NEXTAUTH_SECRET": "{{NEXTAUTH_SECRET}}",
+    "DOMAIN_NAME": "{{DOMAIN_NAME}}"
+  },
+  "pull_image": true,
+  "prune": true
+}

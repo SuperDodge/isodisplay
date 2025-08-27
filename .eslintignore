@@ -1,0 +1,12 @@
+.next
+node_modules
+public
+build
+dist
+coverage
+*.min.js
+*.min.css
+.taskmaster
+*.config.js
+*.config.mjs
+next-env.d.ts
