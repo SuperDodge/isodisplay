@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Play, Pause, SkipForward, SkipBack, X, Maximize, Clock } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,14 +11,12 @@ interface PlaylistPreviewProps {
   playlist: Playlist;
   isOpen: boolean;
   onClose: () => void;
-  onFullscreen?: () => void;
 }
 
 export function PlaylistPreview({
   playlist,
   isOpen,
   onClose,
-  onFullscreen,
 }: PlaylistPreviewProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -162,33 +160,11 @@ export function PlaylistPreview({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl bg-brand-gray-900/95 backdrop-blur-xl border-white/20">
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-bold text-white">
-              Playlist Preview: {playlist.name}
-            </DialogTitle>
-            <div className="flex items-center gap-2">
-              {onFullscreen && (
-                <Button
-                  onClick={onFullscreen}
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-white/10"
-                >
-                  <Maximize className="w-4 h-4" />
-                </Button>
-              )}
-              <Button
-                onClick={onClose}
-                variant="ghost"
-                size="icon"
-                className="text-white hover:bg-white/10"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
+          <DialogTitle className="text-xl font-bold text-white">
+            Playlist Preview: {playlist.name}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">

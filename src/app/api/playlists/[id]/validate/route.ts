@@ -3,21 +3,19 @@ import { getCurrentUser, hasPermission } from '@/lib/auth-helpers';
 // Removed authOptions import
 import { playlistValidator } from '@/lib/services/playlist-validator';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
 // GET /api/playlists/[id]/validate - Validate playlist
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await getCurrentUser();
     if (!user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const validationResult = await playlistValidator.validatePlaylist(params.id);
+    const { id } = await params;
+    const validationResult = await playlistValidator.validatePlaylist(id);
 
     return NextResponse.json(validationResult);
   } catch (error) {
@@ -30,17 +28,21 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // POST /api/playlists/[id]/validate - Fix playlist issues
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await getCurrentUser();
     if (!user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     const { removeMissing, fixDurations, fixTransitions } = body;
 
-    const result = await playlistValidator.fixPlaylistIssues(params.id, {
+    const result = await playlistValidator.fixPlaylistIssues(id, {
       removeMissing: removeMissing ?? false,
       fixDurations: fixDurations ?? true,
       fixTransitions: fixTransitions ?? true,

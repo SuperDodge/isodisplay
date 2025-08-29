@@ -9,7 +9,7 @@ import type {
   PlaylistUpdateMessage, 
   DisplayControlMessage, 
   EmergencyStopMessage 
-} from '@/lib/services/websocket-service';
+} from '@/types/websocket';
 
 interface LightweightDisplayPlayerProps {
   display: Display;

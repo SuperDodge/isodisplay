@@ -109,8 +109,26 @@ export function ContentGrid({ content, selectedItems, onSelectionChange, onEdit,
               />
 
               {/* Type Badge */}
-              <div className="absolute top-2 right-2 px-3 py-1.5 bg-black/50 backdrop-blur-sm rounded text-sm text-white font-medium">
-                {typeof item.type === 'string' ? item.type : item.type.toString()}
+              <div className={`absolute top-2 right-2 px-2 py-0.5 rounded text-xs font-medium capitalize ${
+                item.type === 'video' || item.type === ContentType.VIDEO
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                  : item.type === 'youtube' || item.type === ContentType.YOUTUBE
+                    ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                    : item.type === 'pdf' || item.type === ContentType.PDF
+                      ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                      : item.type === 'url' || item.type === ContentType.URL
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                        : item.type === 'text' || item.type === ContentType.TEXT
+                          ? 'bg-gray-500/20 text-gray-300 border border-gray-500/30'
+                          : 'bg-green-500/20 text-green-300 border border-green-500/30'
+              }`}>
+                {item.type === 'youtube' || item.type === ContentType.YOUTUBE ? 'YouTube' : 
+                 item.type === 'video' || item.type === ContentType.VIDEO ? 'Video' :
+                 item.type === 'image' || item.type === ContentType.IMAGE ? 'Image' :
+                 item.type === 'pdf' || item.type === ContentType.PDF ? 'PDF' :
+                 item.type === 'url' || item.type === ContentType.URL ? 'URL' :
+                 item.type === 'text' || item.type === ContentType.TEXT ? 'Text' : 
+                 'Image'}
               </div>
 
               {/* Hover Overlay with Actions */}

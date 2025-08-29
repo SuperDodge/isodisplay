@@ -149,23 +149,23 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-brand-gray-900 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4">
+      <div className="bg-white/[0.02] backdrop-blur-xl backdrop-saturate-150 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border-2 border-white/20">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-white/20">
+        <div className="flex justify-between items-center p-6 border-b border-white/10">
           <h2 className="text-2xl font-bold text-white">Upload Content</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition"
+            className="text-white/70 hover:text-white transition"
           >
-            <X className="w-5 h-5 text-white" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Upload Area */}
         <div className="flex-1 overflow-y-auto p-6">
           <div
-            className="border-2 border-dashed border-white/30 rounded-lg p-8 text-center hover:border-brand-orange-500/50 transition cursor-pointer"
+            className="border-2 border-dashed border-white/10 rounded-lg p-8 text-center hover:border-brand-orange-500/50 transition cursor-pointer"
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onClick={() => fileInputRef.current?.click()}
@@ -195,7 +195,7 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
               {files.map((file, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/20"
+                  className="flex items-center justify-between p-3 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10"
                 >
                   <div className="flex items-center gap-3 flex-1">
                     <File className="w-5 h-5 text-white/70" />
@@ -223,7 +223,7 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                         e.stopPropagation();
                         removeFile(index);
                       }}
-                      className="p-1 hover:bg-white/10 rounded transition"
+                      className="p-1 hover:bg-white/5 backdrop-blur-sm rounded transition-all"
                       disabled={uploading}
                     >
                       <X className="w-4 h-4 text-white/70" />
@@ -236,7 +236,7 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
 
           {/* Image Display Settings */}
           {files.some(file => file.type.startsWith('image/')) && (
-            <div className="mt-6 space-y-4 p-4 bg-white/5 rounded-lg border border-white/20">
+            <div className="mt-6 space-y-4 p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
               <h3 className="text-white font-semibold">Image Display Settings</h3>
               
               {/* Background Color Picker */}
@@ -247,14 +247,14 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                     type="color"
                     value={backgroundColor}
                     onChange={(e) => setBackgroundColor(e.target.value)}
-                    className="w-12 h-12 rounded cursor-pointer border-2 border-white/20"
+                    className="w-12 h-12 rounded cursor-pointer border-2 border-white/10"
                   />
                   <input
                     type="text"
                     value={backgroundColor}
                     onChange={(e) => setBackgroundColor(e.target.value)}
                     placeholder="#000000"
-                    className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50"
+                    className="flex-1 px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg text-white placeholder-white/50 focus:bg-white/10 transition-all"
                   />
                 </div>
               </div>
@@ -269,7 +269,7 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                     className={`px-3 py-2 rounded-lg border transition ${
                       imageScale === 'contain'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-all'
                     }`}
                   >
                     Fit
@@ -280,7 +280,7 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                     className={`px-3 py-2 rounded-lg border transition ${
                       imageScale === 'cover'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-all'
                     }`}
                   >
                     Fill
@@ -291,7 +291,7 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                     className={`px-3 py-2 rounded-lg border transition ${
                       imageScale === 'fill'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-all'
                     }`}
                   >
                     Stretch
@@ -317,9 +317,9 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                       max="100"
                       value={imageSize}
                       onChange={(e) => setImageSize(parseInt(e.target.value))}
-                      className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                      className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
                       style={{
-                        background: `linear-gradient(to right, #f56600 0%, #f56600 ${imageSize}%, rgba(255, 255, 255, 0.2) ${imageSize}%, rgba(255, 255, 255, 0.2) 100%)`
+                        background: `linear-gradient(to right, #f56600 0%, #f56600 ${imageSize}%, rgba(255, 255, 255, 0.1) ${imageSize}%, rgba(255, 255, 255, 0.1) 100%)`
                       }}
                     />
                     <div className="flex justify-between text-xs text-white/50 mt-1">
@@ -335,7 +335,7 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
 
           {/* PDF Display Settings */}
           {files.some(file => file.type === 'application/pdf') && (
-            <div className="mt-6 space-y-4 p-4 bg-white/5 rounded-lg border border-white/20">
+            <div className="mt-6 space-y-4 p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
               <h3 className="text-white font-semibold">PDF Display Settings</h3>
               
               {/* Background Color Picker */}
@@ -346,14 +346,14 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                     type="color"
                     value={backgroundColor}
                     onChange={(e) => setBackgroundColor(e.target.value)}
-                    className="w-12 h-12 rounded cursor-pointer border-2 border-white/20"
+                    className="w-12 h-12 rounded cursor-pointer border-2 border-white/10"
                   />
                   <input
                     type="text"
                     value={backgroundColor}
                     onChange={(e) => setBackgroundColor(e.target.value)}
                     placeholder="#000000"
-                    className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50"
+                    className="flex-1 px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg text-white placeholder-white/50 focus:bg-white/10 transition-all"
                   />
                 </div>
               </div>
@@ -368,7 +368,7 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                     className={`px-3 py-2 rounded-lg border transition ${
                       pdfScale === 'contain'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-all'
                     }`}
                   >
                     Fit
@@ -379,7 +379,7 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                     className={`px-3 py-2 rounded-lg border transition ${
                       pdfScale === 'cover'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-all'
                     }`}
                   >
                     Fill
@@ -390,7 +390,7 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                     className={`px-3 py-2 rounded-lg border transition ${
                       pdfScale === 'fill'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-all'
                     }`}
                   >
                     Stretch
@@ -416,9 +416,9 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                       max="100"
                       value={pdfSize}
                       onChange={(e) => setPdfSize(parseInt(e.target.value))}
-                      className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                      className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
                       style={{
-                        background: `linear-gradient(to right, #f56600 0%, #f56600 ${pdfSize}%, rgba(255, 255, 255, 0.2) ${pdfSize}%, rgba(255, 255, 255, 0.2) 100%)`
+                        background: `linear-gradient(to right, #f56600 0%, #f56600 ${pdfSize}%, rgba(255, 255, 255, 0.1) ${pdfSize}%, rgba(255, 255, 255, 0.1) 100%)`
                       }}
                     />
                     <div className="flex justify-between text-xs text-white/50 mt-1">
@@ -453,17 +453,17 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-white/20 flex justify-end gap-3">
+        <div className="p-6 border-t border-white/10 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition"
+            className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg backdrop-blur-sm transition-all"
             disabled={uploading}
           >
             Cancel
           </button>
           <button
             onClick={handleUpload}
-            className="px-6 py-2 bg-brand-orange-500 hover:bg-brand-orange-600 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-brand-orange-500/90 hover:bg-brand-orange-600 text-white rounded-lg backdrop-blur-sm transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={files.length === 0 || uploading}
           >
             {uploading ? 'Uploading...' : `Upload ${files.length} File${files.length !== 1 ? 's' : ''}`}

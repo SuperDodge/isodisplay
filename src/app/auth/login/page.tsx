@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Input } from '@/components/ui/input';
 
 const LoginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -83,11 +84,11 @@ export default function LoginPage() {
               <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
                 Email Address
               </label>
-              <input
+              <Input
                 {...register('email')}
                 type="email"
                 id="email"
-                className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-brand-orange-500 focus:border-transparent"
+                className="w-full"
                 placeholder="you@example.com"
                 disabled={isLoading}
               />
@@ -100,11 +101,11 @@ export default function LoginPage() {
               <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
                 Password
               </label>
-              <input
+              <Input
                 {...register('password')}
                 type="password"
                 id="password"
-                className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-brand-orange-500 focus:border-transparent"
+                className="w-full"
                 placeholder="••••••••"
                 disabled={isLoading}
               />

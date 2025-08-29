@@ -10,6 +10,7 @@ interface FallbackContentProps {
   onRetry?: () => void;
   showRetryButton?: boolean;
   autoRetrySeconds?: number;
+  isConnected?: boolean;
 }
 
 export function FallbackContent({ 
@@ -18,7 +19,8 @@ export function FallbackContent({
   displayName,
   onRetry,
   showRetryButton = false,
-  autoRetrySeconds
+  autoRetrySeconds,
+  isConnected = false
 }: FallbackContentProps) {
   const [timeRemaining, setTimeRemaining] = useState(autoRetrySeconds || 0);
 
@@ -119,6 +121,45 @@ export function FallbackContent({
     return () => clearInterval(interval);
   }, []);
 
+  // Special simplified display for no-content - matches ISOMER BRAND SIGNATURE - GREY
+  if (type === 'no-content') {
+    return (
+      <div className="min-h-screen bg-gray-800 flex flex-col items-center justify-center text-white relative">
+        {/* Main Logo/Brand - Isomer style */}
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-7xl font-bold tracking-wider text-white mb-2">
+              ISOMER
+            </div>
+            <div className="text-2xl tracking-widest text-white/80">
+              DIGITAL SIGNAGE
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom message */}
+        <div className="pb-8">
+          <p className="text-sm text-white/60">
+            No Playlist Assigned to this Display
+          </p>
+        </div>
+
+        {/* WebSocket connection indicator - top right */}
+        <div className="absolute top-4 right-4">
+          <div className="flex items-center gap-2 text-xs text-white/40">
+            <span className={`w-2 h-2 rounded-full ${
+              isConnected 
+                ? 'bg-green-500 animate-pulse' 
+                : 'bg-red-500'
+            }`}></span>
+            <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Regular fallback content for other error types
   return (
     <div className="min-h-screen bg-brand-gray-900 flex items-center justify-center text-white relative">
       {/* Background pattern */}
@@ -171,27 +212,6 @@ export function FallbackContent({
           </button>
         )}
 
-        {/* Suggestions based on error type */}
-        {type === 'no-content' && (
-          <div className="bg-gray-800/50 rounded-lg p-6 text-left space-y-3">
-            <h3 className="text-lg font-semibold text-brand-orange-500">Next Steps:</h3>
-            <ul className="space-y-2 text-gray-300">
-              <li className="flex items-start gap-2">
-                <span className="text-brand-orange-500 mt-1">1.</span>
-                <span>Log into the admin interface</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-brand-orange-500 mt-1">2.</span>
-                <span>Create or select a playlist</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-brand-orange-500 mt-1">3.</span>
-                <span>Assign the playlist to this display</span>
-              </li>
-            </ul>
-          </div>
-        )}
-
         {type === 'network-error' && (
           <div className="bg-gray-800/50 rounded-lg p-6 text-left space-y-3">
             <h3 className="text-lg font-semibold text-red-400">Troubleshooting:</h3>
@@ -228,8 +248,17 @@ export function FallbackContent({
         Status: {type.replace('-', ' ').toUpperCase()}
       </div>
       
-      <div className="absolute top-4 right-4 text-xs text-gray-500">
-        {new Date().toLocaleDateString()}
+      <div className="absolute top-4 right-4 flex items-center gap-4 text-xs text-gray-500">
+        {/* WebSocket connection indicator */}
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${
+            isConnected 
+              ? 'bg-green-500 animate-pulse' 
+              : 'bg-red-500'
+          }`}></span>
+          <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
+        </div>
+        <span>{new Date().toLocaleDateString()}</span>
       </div>
     </div>
   );

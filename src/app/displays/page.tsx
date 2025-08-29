@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Monitor, Edit, Trash2, Copy, CheckCircle, XCircle, AlertCircle, RefreshCw, AlertTriangle, Check } from 'lucide-react';
+import { Plus, Monitor, Edit, Trash2, Copy, CheckCircle, XCircle, AlertCircle, RefreshCw, AlertTriangle, Check, MonitorPlay } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,12 +20,10 @@ import DisplayModal from '@/components/displays/DisplayModal';
 import { Display, DisplayStatus } from '@/types/display';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
-import { useCSRF } from '@/hooks/useCSRF';
 
 export default function DisplaysPage() {
   const { user: currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
-  const { secureFetch } = useCSRF();
   const [displays, setDisplays] = useState<Display[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -55,7 +53,13 @@ export default function DisplaysPage() {
 
   const fetchDisplays = async () => {
     try {
-      const response = await secureFetch('/api/displays');
+      const response = await fetch('/api/displays', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+      });
       if (response.ok) {
         const data = await response.json();
         console.log('Raw API response:', data);
@@ -98,8 +102,12 @@ export default function DisplaysPage() {
     setDeleteConfirmOpen(false);
     
     try {
-      const response = await secureFetch(`/api/displays/${displayToDelete.id}`, {
+      const response = await fetch(`/api/displays/${displayToDelete.id}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
       });
 
       if (response.ok) {
@@ -184,9 +192,12 @@ export default function DisplaysPage() {
     <div className="p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Display Management</h1>
-          <p className="text-white/70">Configure and monitor your digital signage displays</p>
+        <div className="flex items-center gap-3 mb-8">
+          <MonitorPlay className="w-12 h-12 text-brand-orange-500" />
+          <div>
+            <h1 className="text-4xl font-bold text-white uppercase tracking-wide font-['Made_Tommy']">Display Management</h1>
+            <p className="text-white/70">Configure and monitor your digital signage displays</p>
+          </div>
         </div>
 
         {/* Actions Bar */}
@@ -254,8 +265,8 @@ export default function DisplaysPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/50">Playlist:</span>
-                    <span className="text-white">
-                      {display.assignedPlaylist?.name || 'None'}
+                    <span className={display.assignedPlaylist ? "text-white" : "text-yellow-500"}>
+                      {display.assignedPlaylist?.name || 'No playlist assigned'}
                     </span>
                   </div>
                   {display.lastSeen && (

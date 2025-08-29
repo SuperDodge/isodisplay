@@ -2,8 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, hasPermission } from '@/lib/auth-helpers';
 // Removed authOptions import
 import { displayService } from '@/lib/services/display-service';
+import { playlistService } from '@/lib/services/playlist-service';
 import { validateUpdateDisplay, type UpdateDisplayInput } from '@/lib/validators/display-schemas';
 import { validationErrorResponse, ErrorResponses, isValidUUID } from '@/lib/validators/api-validators';
+import { broadcastDisplayUpdate, broadcastPlaylistUpdate } from '@/lib/socket-server';
+import { apiToFrontendPlaylist } from '@/lib/transformers/api-transformers';
+
+// Helper to serialize BigInt values
+function serializeBigInt(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === 'bigint') return obj.toString();
+  if (obj instanceof Date) return obj.toISOString();
+  if (Array.isArray(obj)) return obj.map(serializeBigInt);
+  if (typeof obj === 'object') {
+    const serialized: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      serialized[key] = serializeBigInt(value);
+    }
+    return serialized;
+  }
+  return obj;
+}
 
 interface RouteParams {
   params: Promise<{
@@ -32,7 +51,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Display not found' }, { status: 404 });
     }
 
-    return NextResponse.json(display);
+    // Serialize BigInt values before returning
+    const serializedDisplay = serializeBigInt(display);
+    return NextResponse.json(serializedDisplay);
   } catch (error) {
     console.error('Error fetching display:', error);
     return NextResponse.json(
@@ -73,7 +94,49 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Display not found' }, { status: 404 });
     }
 
-    return NextResponse.json(display);
+    // If the playlist was updated, notify the display via WebSocket
+    if (validatedData.assignedPlaylistId !== undefined) {
+      // Get the full display with playlist data
+      const fullDisplay = await displayService.getDisplay(id);
+      const serializedDisplay = serializeBigInt(fullDisplay);
+      
+      if (display.assignedPlaylistId) {
+        // Get the full playlist data if a playlist is assigned
+        const playlist = await playlistService.getById(display.assignedPlaylistId);
+        if (playlist) {
+          // Transform playlist to frontend format
+          const frontendPlaylist = apiToFrontendPlaylist(playlist as any);
+          
+          // Serialize BigInt values before sending via WebSocket
+          const serializedPlaylist = serializeBigInt(frontendPlaylist);
+          
+          // Send WebSocket notification to the display
+          broadcastPlaylistUpdate(id, serializedPlaylist);
+        }
+      } else {
+        // Playlist was set to "none" - explicitly send null
+        broadcastPlaylistUpdate(id, null);
+      }
+      
+      // Always send display update notification when playlist changes
+      // Include the full display data with assignedPlaylist populated or explicitly null
+      broadcastDisplayUpdate(id, {
+        ...serializedDisplay,
+        assignedPlaylist: display.assignedPlaylistId ? serializedDisplay.assignedPlaylist : null,
+        refresh: true  // Force refresh when playlist changes
+      });
+    } else if (validatedData.clockSettings !== undefined) {
+      // If only clock settings were updated, send display update
+      const serializedDisplay = serializeBigInt(display);
+      broadcastDisplayUpdate(id, {
+        ...serializedDisplay,
+        refresh: false
+      });
+    }
+
+    // Serialize BigInt values before returning
+    const serializedDisplay = serializeBigInt(display);
+    return NextResponse.json(serializedDisplay);
   } catch (error) {
     console.error('Error updating display:', error);
     return NextResponse.json(

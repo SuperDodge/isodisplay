@@ -75,8 +75,8 @@ export function TextContentModal({ onClose, onSuccess }: TextContentModalProps) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-brand-gray-900/95 rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col border border-white/20">
+    <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4">
+      <div className="bg-white/[0.02] backdrop-blur-xl backdrop-saturate-150 rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col border-2 border-white/20">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -95,7 +95,7 @@ export function TextContentModal({ onClose, onSuccess }: TextContentModalProps) 
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {error && (
-              <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg flex items-start gap-2">
+              <div className="p-3 bg-red-500/10 backdrop-blur-sm border border-red-500/50 rounded-lg flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-red-300 mt-0.5" />
                 <p className="text-red-300 text-sm">{error}</p>
               </div>
@@ -112,7 +112,7 @@ export function TextContentModal({ onClose, onSuccess }: TextContentModalProps) 
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="mt-1 bg-white/10 border-white/20 text-white"
+                className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                 placeholder="Enter a name for this text"
               />
             </div>
@@ -126,7 +126,7 @@ export function TextContentModal({ onClose, onSuccess }: TextContentModalProps) 
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-1 bg-white/10 border-white/20 text-white"
+                className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                 placeholder="Optional description"
                 rows={2}
               />
@@ -142,7 +142,7 @@ export function TextContentModal({ onClose, onSuccess }: TextContentModalProps) 
                 value={formData.textContent}
                 onChange={(e) => setFormData({ ...formData, textContent: e.target.value })}
                 required
-                className="mt-1 bg-white/10 border-white/20 text-white"
+                className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                 placeholder="Enter the text to display"
                 rows={5}
               />
@@ -158,7 +158,7 @@ export function TextContentModal({ onClose, onSuccess }: TextContentModalProps) 
                 type="text"
                 value={formData.fontSize}
                 onChange={(e) => setFormData({ ...formData, fontSize: e.target.value })}
-                className="mt-1 bg-white/10 border-white/20 text-white"
+                className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                 placeholder="3rem"
               />
               <p className="text-white/50 text-xs mt-1">
@@ -174,14 +174,14 @@ export function TextContentModal({ onClose, onSuccess }: TextContentModalProps) 
                   type="color"
                   value={formData.fontColor}
                   onChange={(e) => setFormData({ ...formData, fontColor: e.target.value })}
-                  className="w-12 h-10 rounded cursor-pointer border-2 border-white/20"
+                  className="w-12 h-10 rounded cursor-pointer border-2 border-white/10"
                 />
                 <Input
                   type="text"
                   value={formData.fontColor}
                   onChange={(e) => setFormData({ ...formData, fontColor: e.target.value })}
                   placeholder="#ffffff"
-                  className="flex-1 bg-white/10 border-white/20 text-white"
+                  className="flex-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                 />
               </div>
             </div>
@@ -196,7 +196,7 @@ export function TextContentModal({ onClose, onSuccess }: TextContentModalProps) 
                   className={`px-3 py-2 rounded-lg border transition ${
                     formData.textAlign === 'left'
                       ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                      : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                      : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
                   }`}
                 >
                   Left
@@ -207,7 +207,7 @@ export function TextContentModal({ onClose, onSuccess }: TextContentModalProps) 
                   className={`px-3 py-2 rounded-lg border transition ${
                     formData.textAlign === 'center'
                       ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                      : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                      : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
                   }`}
                 >
                   Center
@@ -218,7 +218,7 @@ export function TextContentModal({ onClose, onSuccess }: TextContentModalProps) 
                   className={`px-3 py-2 rounded-lg border transition ${
                     formData.textAlign === 'right'
                       ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                      : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                      : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
                   }`}
                 >
                   Right
@@ -236,7 +236,7 @@ export function TextContentModal({ onClose, onSuccess }: TextContentModalProps) 
                 type="number"
                 value={formData.duration}
                 onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 10 })}
-                className="mt-1 bg-white/10 border-white/20 text-white"
+                className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                 placeholder="10"
                 min="1"
               />
@@ -248,20 +248,20 @@ export function TextContentModal({ onClose, onSuccess }: TextContentModalProps) 
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-white/20">
+        <div className="p-6 border-t border-white/10">
           <div className="flex gap-3">
             <Button
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="flex-1 text-white hover:bg-white/10"
+              className="flex-1 text-white hover:bg-white/10 backdrop-blur-sm"
               disabled={loading}
             >
               Cancel
             </Button>
             <Button
               onClick={handleSubmit}
-              className="flex-1 bg-brand-orange-500 hover:bg-brand-orange-600 text-white"
+              className="flex-1 bg-brand-orange-500/90 backdrop-blur-sm hover:bg-brand-orange-600/90 text-white"
               disabled={loading || !formData.name.trim() || !formData.textContent.trim()}
             >
               {loading ? 'Creating...' : 'Create Text'}

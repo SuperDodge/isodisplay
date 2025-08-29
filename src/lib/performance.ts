@@ -275,6 +275,12 @@ class PerformanceOptimizer {
 
     const preloadPromises = urls.slice(0, this.config.maxPreloadItems).map(url => {
       return new Promise<void>((resolve, reject) => {
+        // Skip YouTube URLs and external URLs from preloading
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+          resolve(); // Don't preload YouTube content
+          return;
+        }
+
         if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
           const img = new Image();
           img.onload = () => resolve();
@@ -286,11 +292,13 @@ class PerformanceOptimizer {
           video.onloadedmetadata = () => resolve();
           video.onerror = () => reject(new Error(`Failed to preload ${url}`));
           video.src = url;
-        } else {
-          // For other content types, use fetch
+        } else if (url.startsWith('/') || url.startsWith('http')) {
+          // Only preload local content or same-origin URLs
           fetch(url, { method: 'HEAD' })
             .then(() => resolve())
-            .catch(() => reject(new Error(`Failed to preload ${url}`)));
+            .catch(() => resolve()); // Don't fail the whole preload if one URL fails
+        } else {
+          resolve(); // Skip unknown content types
         }
       });
     });

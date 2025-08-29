@@ -90,7 +90,7 @@ export default function PlaylistMetrics() {
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
+    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20 h-[600px] overflow-y-auto custom-scrollbar flex flex-col">
       <div className="flex items-center mb-6">
         <PlayCircle className="text-brand-orange-500 mr-3" size={24} />
         <h2 className="text-xl font-bold text-white">Playlist Performance</h2>

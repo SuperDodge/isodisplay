@@ -3,25 +3,23 @@ import { getCurrentUser, hasPermission } from '@/lib/auth-helpers';
 // Removed authOptions import
 import { playlistService } from '@/lib/services/playlist-service';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
 // POST /api/playlists/[id]/duplicate - Duplicate playlist
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await getCurrentUser();
     if (!user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await request.json();
     const { name } = body;
 
     const duplicatedPlaylist = await playlistService.duplicatePlaylist(
-      params.id,
+      id,
       user.id,
       name
     );

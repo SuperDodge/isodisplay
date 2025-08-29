@@ -8,7 +8,7 @@ import type {
   DisplayControlMessage,
   StatusUpdateMessage,
   EmergencyStopMessage
-} from '@/lib/services/websocket-service';
+} from '@/types/websocket';
 
 interface UseWebSocketOptions {
   displayId?: string;

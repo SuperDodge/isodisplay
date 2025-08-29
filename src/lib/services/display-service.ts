@@ -40,6 +40,7 @@ class DisplayService {
         orientation: (input.orientation || 'LANDSCAPE') as DisplayOrientation,
         playlistId: input.assignedPlaylistId || null,
         isOnline: false,
+        clockSettings: input.clockSettings || {},
       },
       include: {
         playlist: {
@@ -152,27 +153,49 @@ class DisplayService {
 
   // Update display
   async updateDisplay(displayId: string, input: UpdateDisplayInput): Promise<Display | null> {
-    const display = await prisma.display.update({
-      where: { id: displayId },
-      data: {
-        name: input.name,
-        location: input.location,
-        resolution: input.resolution,
-        orientation: input.orientation as DisplayOrientation,
-        playlistId: input.assignedPlaylistId,
-        updatedAt: new Date(),
-      },
-      include: {
-        playlist: {
-          select: {
-            id: true,
-            name: true,
+    // Build update data object with only defined values
+    const updateData: any = {
+      updatedAt: new Date(),
+    };
+
+    // Only add fields that are defined
+    if (input.name !== undefined) updateData.name = input.name;
+    if (input.location !== undefined) updateData.location = input.location;
+    if (input.resolution !== undefined) updateData.resolution = input.resolution;
+    if (input.orientation !== undefined) updateData.orientation = input.orientation as DisplayOrientation;
+    if (input.assignedPlaylistId !== undefined) updateData.playlistId = input.assignedPlaylistId;
+    
+    // Handle clockSettings - ensure it's a valid JSON object
+    if (input.clockSettings !== undefined) {
+      // Ensure clockSettings is properly formatted as JSON
+      updateData.clockSettings = JSON.parse(JSON.stringify(input.clockSettings));
+    }
+
+    try {
+      const display = await prisma.display.update({
+        where: { id: displayId },
+        data: updateData,
+        include: {
+          playlist: {
+            include: {
+              items: {
+                include: {
+                  content: true,
+                },
+                orderBy: {
+                  order: 'asc',
+                },
+              },
+            },
           },
         },
-      },
-    });
+      });
 
-    return this.formatDisplay(display);
+      return this.formatDisplay(display);
+    } catch (error) {
+      console.error('DisplayService.updateDisplay - Prisma error:', error);
+      throw error;
+    }
   }
 
   // Delete display
@@ -340,6 +363,7 @@ class DisplayService {
       createdBy: '',  // No createdBy field in schema
       isActive: true,  // Always true since we don't have soft delete
       settings: {},  // No settings field in schema
+      clockSettings: display.clockSettings || {},
     };
   }
 }

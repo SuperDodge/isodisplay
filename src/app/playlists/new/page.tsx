@@ -39,23 +39,21 @@ export default function NewPlaylistPage() {
       });
 
       if (response.ok) {
+        // Navigate without triggering unsaved changes dialog
         router.push('/playlists');
       } else {
         console.error('Failed to save playlist');
+        // Keep user on page if save failed
       }
     } catch (error) {
       console.error('Error saving playlist:', error);
+      // Keep user on page if save failed
     }
   };
 
   const handlePreview = (playlist: Playlist) => {
     // Handle full-screen preview
     console.log('Preview playlist:', playlist);
-  };
-
-  const handleShare = (playlist: Playlist) => {
-    // Handle sharing functionality
-    console.log('Share playlist:', playlist);
   };
 
   if (authLoading) {
@@ -70,7 +68,6 @@ export default function NewPlaylistPage() {
     <PlaylistBuilder
       onSave={handleSave}
       onPreview={handlePreview}
-      onShare={handleShare}
     />
   );
 }

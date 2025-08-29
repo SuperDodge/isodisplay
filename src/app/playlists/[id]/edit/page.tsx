@@ -75,23 +75,21 @@ export default function EditPlaylistPage({ params }: { params: Promise<{ id: str
       });
 
       if (response.ok) {
+        // Navigate without triggering unsaved changes dialog
         router.push('/playlists');
       } else {
         console.error('Failed to update playlist');
+        // Keep user on page if save failed
       }
     } catch (error) {
       console.error('Error updating playlist:', error);
+      // Keep user on page if save failed
     }
   };
 
   const handlePreview = (playlist: Playlist) => {
     // Handle full-screen preview
     console.log('Preview playlist:', playlist);
-  };
-
-  const handleShare = (playlist: Playlist) => {
-    // Handle sharing functionality
-    console.log('Share playlist:', playlist);
   };
 
   if (authLoading || loading) {
@@ -116,7 +114,6 @@ export default function EditPlaylistPage({ params }: { params: Promise<{ id: str
       initialPlaylist={playlist}
       onSave={handleSave}
       onPreview={handlePreview}
-      onShare={handleShare}
     />
   );
 }

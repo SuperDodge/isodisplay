@@ -132,8 +132,8 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-brand-gray-900/95 rounded-lg shadow-2xl w-full max-w-md border border-white/20">
+    <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4">
+      <div className="bg-white/[0.02] backdrop-blur-xl backdrop-saturate-150 rounded-lg shadow-2xl w-full max-w-md border-2 border-white/20">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/10">
           <h2 className="text-xl font-semibold text-white">Edit Content</h2>
@@ -148,7 +148,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300 text-sm">
+            <div className="p-3 bg-red-500/10 backdrop-blur-sm border border-red-500/50 rounded-lg text-red-300 text-sm">
               {error}
             </div>
           )}
@@ -156,7 +156,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
           {/* Content Type Display */}
           <div>
             <Label className="text-white/70 text-sm">Type</Label>
-            <div className="mt-1 px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white/50">
+            <div className="mt-1 px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg text-white/50">
               {content.type}
             </div>
           </div>
@@ -172,7 +172,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              className="mt-1 bg-white/10 border-white/20 text-white"
+              className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
               placeholder="Enter content name"
             />
           </div>
@@ -186,7 +186,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="mt-1 bg-white/10 border-white/20 text-white"
+              className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
               placeholder="Enter content description"
               rows={3}
             />
@@ -203,7 +203,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                 type="number"
                 value={formData.duration}
                 onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 0 })}
-                className="mt-1 bg-white/10 border-white/20 text-white"
+                className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                 placeholder="Enter duration in seconds"
                 min="0"
               />
@@ -223,7 +223,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                 type="number"
                 value={formData.duration}
                 onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 0 })}
-                className="mt-1 bg-white/10 border-white/20 text-white"
+                className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                 placeholder="How long to display (0 for default)"
                 min="0"
               />
@@ -241,14 +241,14 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                     type="color"
                     value={formData.backgroundColor}
                     onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
-                    className="w-12 h-10 rounded cursor-pointer border-2 border-white/20"
+                    className="w-12 h-10 rounded cursor-pointer border-2 border-white/10"
                   />
                   <Input
                     type="text"
                     value={formData.backgroundColor}
                     onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
                     placeholder="#000000"
-                    className="flex-1 bg-white/10 border-white/20 text-white"
+                    className="flex-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                   />
                 </div>
               </div>
@@ -263,7 +263,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                     className={`px-3 py-2 rounded-lg border transition ${
                       formData.imageScale === 'contain'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
                     }`}
                   >
                     Fit
@@ -274,7 +274,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                     className={`px-3 py-2 rounded-lg border transition ${
                       formData.imageScale === 'cover'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
                     }`}
                   >
                     Fill
@@ -285,7 +285,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                     className={`px-3 py-2 rounded-lg border transition ${
                       formData.imageScale === 'fill'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
                     }`}
                   >
                     Stretch
@@ -311,7 +311,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                       max="100"
                       value={formData.imageSize}
                       onChange={(e) => setFormData({ ...formData, imageSize: parseInt(e.target.value) })}
-                      className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+                      className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer slider"
                       style={{
                         background: `linear-gradient(to right, #f56600 0%, #f56600 ${formData.imageSize}%, rgba(255, 255, 255, 0.2) ${formData.imageSize}%, rgba(255, 255, 255, 0.2) 100%)`
                       }}
@@ -338,14 +338,14 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                     type="color"
                     value={formData.backgroundColor}
                     onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
-                    className="w-12 h-10 rounded cursor-pointer border-2 border-white/20"
+                    className="w-12 h-10 rounded cursor-pointer border-2 border-white/10"
                   />
                   <Input
                     type="text"
                     value={formData.backgroundColor}
                     onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
                     placeholder="#000000"
-                    className="flex-1 bg-white/10 border-white/20 text-white"
+                    className="flex-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                   />
                 </div>
               </div>
@@ -360,7 +360,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                     className={`px-3 py-2 rounded-lg border transition ${
                       formData.pdfScale === 'contain'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
                     }`}
                   >
                     Fit
@@ -371,7 +371,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                     className={`px-3 py-2 rounded-lg border transition ${
                       formData.pdfScale === 'cover'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
                     }`}
                   >
                     Fill
@@ -382,7 +382,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                     className={`px-3 py-2 rounded-lg border transition ${
                       formData.pdfScale === 'fill'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
                     }`}
                   >
                     Stretch
@@ -408,7 +408,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                       max="100"
                       value={formData.pdfSize}
                       onChange={(e) => setFormData({ ...formData, pdfSize: parseInt(e.target.value) })}
-                      className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+                      className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer slider"
                       style={{
                         background: `linear-gradient(to right, #f56600 0%, #f56600 ${formData.pdfSize}%, rgba(255, 255, 255, 0.2) ${formData.pdfSize}%, rgba(255, 255, 255, 0.2) 100%)`
                       }}
@@ -435,7 +435,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                 type="text"
                 value={formData.url}
                 onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                className="mt-1 bg-white/10 border-white/20 text-white"
+                className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                 placeholder="https://www.youtube.com/watch?v=..."
               />
               <p className="text-white/50 text-xs mt-1">
@@ -456,7 +456,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                   id="textContent"
                   value={formData.textContent}
                   onChange={(e) => setFormData({ ...formData, textContent: e.target.value })}
-                  className="mt-1 bg-white/10 border-white/20 text-white"
+                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                   placeholder="Enter the text to display"
                   rows={5}
                 />
@@ -472,7 +472,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                   type="text"
                   value={formData.fontSize}
                   onChange={(e) => setFormData({ ...formData, fontSize: e.target.value })}
-                  className="mt-1 bg-white/10 border-white/20 text-white"
+                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                   placeholder="3rem"
                 />
                 <p className="text-white/50 text-xs mt-1">
@@ -488,14 +488,14 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                     type="color"
                     value={formData.fontColor}
                     onChange={(e) => setFormData({ ...formData, fontColor: e.target.value })}
-                    className="w-12 h-10 rounded cursor-pointer border-2 border-white/20"
+                    className="w-12 h-10 rounded cursor-pointer border-2 border-white/10"
                   />
                   <Input
                     type="text"
                     value={formData.fontColor}
                     onChange={(e) => setFormData({ ...formData, fontColor: e.target.value })}
                     placeholder="#ffffff"
-                    className="flex-1 bg-white/10 border-white/20 text-white"
+                    className="flex-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
                   />
                 </div>
               </div>
@@ -510,7 +510,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                     className={`px-3 py-2 rounded-lg border transition ${
                       formData.textAlign === 'left'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
                     }`}
                   >
                     Left
@@ -521,7 +521,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                     className={`px-3 py-2 rounded-lg border transition ${
                       formData.textAlign === 'center'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
                     }`}
                   >
                     Center
@@ -532,7 +532,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                     className={`px-3 py-2 rounded-lg border transition ${
                       formData.textAlign === 'right'
                         ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
                     }`}
                   >
                     Right
@@ -548,14 +548,14 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="flex-1 text-white hover:bg-white/10"
+              className="flex-1 text-white hover:bg-white/10 backdrop-blur-sm"
               disabled={loading}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-brand-orange-500 hover:bg-brand-orange-600 text-white"
+              className="flex-1 bg-brand-orange-500/90 backdrop-blur-sm hover:bg-brand-orange-600/90 text-white"
               disabled={loading}
             >
               {loading ? 'Saving...' : 'Save Changes'}

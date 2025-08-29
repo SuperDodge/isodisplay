@@ -25,6 +25,9 @@ export interface PlaylistItem {
   thumbnail?: string;
   contentType: 'image' | 'video' | 'pdf';
   cropSettings?: any; // Will be replaced with actual crop settings type
+  backgroundColor?: string;
+  imageScale?: 'contain' | 'cover' | 'fill';
+  imageSize?: number;
   content?: {
     fileUrl: string;
     backgroundColor?: string;
@@ -35,7 +38,6 @@ export interface PlaylistItem {
     };
     [key: string]: any;
   };
-  backgroundColor?: string;
 }
 
 export interface Playlist {
@@ -50,6 +52,8 @@ export interface Playlist {
   isActive: boolean;
   sharedWith: string[]; // user IDs
   tags?: string[];
+  displays?: { id: string; name: string; urlSlug: string }[]; // displays using this playlist
+  creator?: { id: string; username: string; }; // creator user info
 }
 
 export const TRANSITION_EFFECTS: { value: TransitionEffect; label: string; description: string }[] = [

@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { ContentGrid } from '@/components/content/ContentGrid';
-import { ContentList } from '@/components/content/ContentList';
 import { ContentFilters } from '@/components/content/ContentFilters';
 import { ContentUpload } from '@/components/content/ContentUpload';
 import { ContentEditModal } from '@/components/content/ContentEditModal';
 import { YouTubeAddModal } from '@/components/content/YouTubeAddModal';
 import { TextContentModal } from '@/components/content/TextContentModal';
 import { Permission, ContentType } from '@/generated/prisma';
-import { Grid3X3, List, Upload, Search, AlertTriangle, Youtube, Type } from 'lucide-react';
+import { Upload, Search, AlertTriangle, Youtube, Type, FileImage } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +29,6 @@ export default function ContentLibraryPage() {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const { secureFetch } = useCSRF();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -159,9 +158,15 @@ export default function ContentLibraryPage() {
     <div className="p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white/10 backdrop-blur-md rounded-lg shadow-xl p-6 border border-white/20 mb-6">
+        <div className="mb-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-white">Content Library</h1>
+            <div className="flex items-center gap-3">
+              <FileImage className="w-12 h-12 text-brand-orange-500" />
+              <div>
+                <h1 className="text-4xl font-bold text-white uppercase tracking-wide font-['Made_Tommy']">Content Library</h1>
+                <p className="text-white/70">Upload and manage media content for your displays</p>
+              </div>
+            </div>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowTextAdd(true)}
@@ -192,12 +197,12 @@ export default function ContentLibraryPage() {
             {/* Search */}
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 w-5 h-5" />
-              <input
+              <Input
                 type="text"
                 placeholder="Search content..."
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-brand-orange-500"
+                className="w-full pl-10"
               />
             </div>
 
@@ -207,23 +212,6 @@ export default function ContentLibraryPage() {
               onFiltersChange={setFilters}
             />
 
-            {/* View Toggle */}
-            <div className="flex bg-white/10 rounded-lg border border-white/20">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-l-lg transition ${viewMode === 'grid' ? 'bg-brand-orange-500 text-white' : 'text-white/70 hover:text-white'}`}
-                title="Grid view"
-              >
-                <Grid3X3 className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-r-lg transition ${viewMode === 'list' ? 'bg-brand-orange-500 text-white' : 'text-white/70 hover:text-white'}`}
-                title="List view"
-              >
-                <List className="w-5 h-5" />
-              </button>
-            </div>
           </div>
 
           {/* Selection Actions */}
@@ -266,16 +254,8 @@ export default function ContentLibraryPage() {
                 Upload First Content
               </button>
             </div>
-          ) : viewMode === 'grid' ? (
-            <ContentGrid
-              content={content}
-              selectedItems={selectedItems}
-              onSelectionChange={setSelectedItems}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
           ) : (
-            <ContentList
+            <ContentGrid
               content={content}
               selectedItems={selectedItems}
               onSelectionChange={setSelectedItems}

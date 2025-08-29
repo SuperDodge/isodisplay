@@ -92,7 +92,7 @@ export default function DisplayStatusOverview() {
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
+    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20 h-[500px] overflow-y-auto custom-scrollbar flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <Monitor className="text-brand-orange-500 mr-3" size={24} />

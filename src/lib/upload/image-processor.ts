@@ -261,6 +261,107 @@ export async function validateImageForDisplay(
   return { valid: true };
 }
 
+// Generate display-accurate thumbnail from URL (for YouTube videos)
+export async function generateDisplayThumbnailFromUrl(
+  inputUrl: string,
+  outputPath: string,
+  backgroundColor: string = '#000000'
+): Promise<string> {
+  try {
+    // Download the image from URL
+    const response = await fetch(inputUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch thumbnail: ${response.statusText}`);
+    }
+    const imageBuffer = Buffer.from(await response.arrayBuffer());
+    
+    // Parse the background color for sharp
+    const bgColor = backgroundColor.startsWith('#') 
+      ? backgroundColor 
+      : '#000000';
+    
+    // Get the image metadata
+    const metadata = await sharp(imageBuffer).metadata();
+    const inputWidth = metadata.width || 640;
+    const inputHeight = metadata.height || 360;
+    
+    // YouTube thumbnails come in different aspect ratios:
+    // - Modern videos: 16:9 (1280x720, 1920x1080, etc.)
+    // - Older videos: 4:3 with black bars already embedded
+    // We need to detect if the thumbnail already has black bars
+    
+    const imageAspect = inputWidth / inputHeight;
+    const is4x3WithBars = Math.abs(imageAspect - (4/3)) < 0.1; // Check if it's roughly 4:3
+    
+    let processedImage: Buffer;
+    
+    if (is4x3WithBars) {
+      // For 4:3 thumbnails (likely with embedded black bars), 
+      // crop to remove the black bars first, then resize to 16:9
+      // YouTube typically adds black bars to make 16:9 content fit in 4:3
+      // So we crop the center 75% height (which would be 16:9 content in 4:3 frame)
+      const crop16x9Height = Math.round(inputHeight * 0.75);
+      const cropTop = Math.round((inputHeight - crop16x9Height) / 2);
+      
+      processedImage = await sharp(imageBuffer)
+        // First extract what should be the 16:9 content
+        .extract({
+          left: 0,
+          top: cropTop,
+          width: inputWidth,
+          height: crop16x9Height
+        })
+        // Then resize to exactly 640x360
+        .resize(640, 360, {
+          fit: 'fill', // Fill the entire frame since we've already cropped
+          position: 'center'
+        })
+        .jpeg({ quality: 90, progressive: true })
+        .toBuffer();
+    } else {
+      // For already 16:9 content or other aspect ratios, 
+      // resize to fit within 640x360 and add padding if needed
+      const targetAspect = 16 / 9;
+      let resizeWidth, resizeHeight;
+      
+      if (imageAspect > targetAspect) {
+        // Image is wider than 16:9 - fit to width
+        resizeWidth = 640;
+        resizeHeight = Math.round(640 / imageAspect);
+      } else {
+        // Image is taller or exactly 16:9 - fit to height
+        resizeHeight = 360;
+        resizeWidth = Math.round(360 * imageAspect);
+      }
+      
+      // Process the image: resize and pad to exactly 640x360
+      processedImage = await sharp(imageBuffer)
+        .resize(resizeWidth, resizeHeight, {
+          fit: 'inside',
+          withoutEnlargement: false
+        })
+        .extend({
+          top: Math.floor((360 - resizeHeight) / 2),
+          bottom: Math.ceil((360 - resizeHeight) / 2),
+          left: Math.floor((640 - resizeWidth) / 2),
+          right: Math.ceil((640 - resizeWidth) / 2),
+          background: bgColor
+        })
+        .jpeg({ quality: 90, progressive: true })
+        .toBuffer();
+    }
+    
+    // Save to file
+    await sharp(processedImage)
+      .toFile(outputPath);
+    
+    return outputPath;
+  } catch (error) {
+    console.error('Error generating display thumbnail from URL:', error);
+    throw error;
+  }
+}
+
 // Generate display-accurate thumbnail with letterboxing/pillarboxing
 export async function generateDisplayThumbnail(
   inputPath: string,

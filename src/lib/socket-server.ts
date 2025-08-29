@@ -2,24 +2,27 @@ import { Server as HTTPServer } from 'http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { prisma } from '@/lib/prisma';
 
-let io: SocketIOServer | null = null;
+// Use the global io instance from server.js
+declare global {
+  var io: SocketIOServer | undefined;
+}
 
 // Map to track which displays each socket is watching
 const socketToDisplay = new Map<string, string>();
 const displayToSockets = new Map<string, Set<string>>();
 
 export function initSocketServer(httpServer: HTTPServer) {
-  if (io) return io;
+  // This function is no longer needed since server.js handles Socket.IO
+  // But keeping it for compatibility
+  if (global.io) return global.io;
+  
+  console.log('Warning: initSocketServer called but using global.io from server.js');
+  return global.io;
+}
 
-  io = new SocketIOServer(httpServer, {
-    cors: {
-      origin: process.env.NODE_ENV === 'production' ? false : ['http://localhost:3000'],
-      credentials: true,
-    },
-    path: '/api/socket',
-  });
-
-  io.on('connection', (socket: Socket) => {
+// Legacy connection handler - not used anymore since server.js handles connections
+function handleLegacyConnection(socket: Socket) {
+    // This entire function is not used anymore - server.js handles all connections
     console.log('Client connected:', socket.id);
 
     // Handle display subscription
@@ -108,37 +111,41 @@ export function initSocketServer(httpServer: HTTPServer) {
         socketToDisplay.delete(socket.id);
       }
     });
-  });
-
-  return io;
 }
 
 // Helper functions for broadcasting updates
 
 export function broadcastPlaylistUpdate(displayId: string, playlist: any) {
-  if (!io) return;
+  if (!global.io) {
+    console.log('Socket.IO not initialized - cannot broadcast playlist update');
+    return;
+  }
   
-  io.to(`display:${displayId}`).emit('playlist_update', {
+  console.log(`Broadcasting playlist update to display ${displayId}`);
+  global.io.to(`display:${displayId}`).emit('playlist_update', {
     type: 'playlist_update',
-    payload: playlist,
+    data: {
+      displayIds: [displayId],
+      playlist: playlist
+    },
     timestamp: Date.now(),
   });
 }
 
 export function broadcastDisplayUpdate(displayId: string, display: any) {
-  if (!io) return;
+  if (!global.io) {
+    console.log('Socket.IO not initialized - cannot broadcast display update');
+    return;
+  }
   
-  io.to(`display:${displayId}`).emit('display_update', {
-    type: 'display_update',
-    payload: display,
-    timestamp: Date.now(),
-  });
+  console.log(`Broadcasting display update to display ${displayId}`);
+  global.io.to(`display:${displayId}`).emit('display_update', display);
 }
 
 export function broadcastContentUpdate(displayId: string, content: any) {
-  if (!io) return;
+  if (!global.io) return;
   
-  io.to(`display:${displayId}`).emit('content_update', {
+  global.io.to(`display:${displayId}`).emit('content_update', {
     type: 'content_update',
     payload: content,
     timestamp: Date.now(),
@@ -146,9 +153,9 @@ export function broadcastContentUpdate(displayId: string, content: any) {
 }
 
 export function sendCommandToDisplay(displayId: string, command: any) {
-  if (!io) return;
+  if (!global.io) return;
   
-  io.to(`display:${displayId}`).emit('command', {
+  global.io.to(`display:${displayId}`).emit('command', {
     type: 'command',
     payload: command,
     timestamp: Date.now(),

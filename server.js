@@ -33,6 +33,9 @@ app.prepare().then(() => {
     allowEIO3: true
   });
 
+  // Make io instance globally available for API routes
+  global.io = io;
+
   // WebSocket connection handling
   io.on('connection', (socket) => {
     console.log('🔌 New WebSocket connection:', socket.id);

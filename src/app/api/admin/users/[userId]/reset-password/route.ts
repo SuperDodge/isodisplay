@@ -27,7 +27,7 @@ function generateTemporaryPassword(): string {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const user = await getCurrentUser();
@@ -36,15 +36,17 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { userId } = await params;
+    
     // Check if the user exists
-    const targetUser = await userDb.findById(params.userId);
+    const targetUser = await userDb.findById(userId);
     if (!targetUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Prevent resetting own password through admin interface
     const currentUser = await userDb.findByEmail(user.email!);
-    if (currentUser?.id === params.userId) {
+    if (currentUser?.id === userId) {
       return NextResponse.json(
         { error: 'Cannot reset your own password through admin interface' },
         { status: 403 }
@@ -58,7 +60,7 @@ export async function POST(
     const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
     
     // Update user's password
-    await userDb.update(params.userId, {
+    await userDb.update(userId, {
       password: hashedPassword,
     });
 

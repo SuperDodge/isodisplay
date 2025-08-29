@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import ffmpeg from 'fluent-ffmpeg';
 import { prisma } from '@/lib/prisma';
 import { Content, FileThumbnail, FileVersion, ProcessingStatus, ContentType } from '@/generated/prisma';
 import { calculateFileHash } from './file-validator';
@@ -247,7 +248,10 @@ export class FileStorageService {
         });
       } else if (mimeType.startsWith('video/')) {
         // Process video
-        const videoMetadata = await getVideoMetadata(filePath);
+        console.log('Processing video file:', filePath);
+        const absoluteFilePath = path.isAbsolute(filePath) ? filePath : path.join('/Users/sronnie/Documents/Coding/IsoDisplay', filePath);
+        const videoMetadata = await getVideoMetadata(absoluteFilePath);
+        console.log('Video metadata:', videoMetadata);
         metadata.width = videoMetadata.width;
         metadata.height = videoMetadata.height;
         metadata.duration = videoMetadata.duration;
@@ -255,8 +259,10 @@ export class FileStorageService {
         metadata.bitrate = videoMetadata.bitrate;
         
         // Generate video thumbnails with unique directory for this video
-        const outputDir = path.join(path.dirname(filePath), 'thumbnails', contentId);
-        const thumbnails = await generateVideoThumbnails(filePath, outputDir, {
+        const outputDir = path.join(path.dirname(absoluteFilePath), 'thumbnails', contentId);
+        console.log('Creating thumbnail directory:', outputDir);
+        await fs.mkdir(outputDir, { recursive: true });
+        const thumbnails = await generateVideoThumbnails(absoluteFilePath, outputDir, {
           thumbnailCount: 3,
           thumbnailSize: '320x240',
         });
@@ -277,15 +283,25 @@ export class FileStorageService {
           });
           
           // Generate display-accurate thumbnail for video
+          // For videos, we need to create a proper 16:9 thumbnail that shows how it will appear on screen
           const displayThumbPath = path.join(outputDir, 'display-thumb.jpg');
           const content = await prisma.content.findUnique({ where: { id: contentId } });
-          await generateDisplayThumbnail(
-            thumbnails[0], // Use the first video thumbnail as source
-            displayThumbPath,
-            content?.backgroundColor || '#000000',
-            metadata.imageScale || 'contain',
-            metadata.imageSize || 100
-          );
+          
+          // Create a 640x360 (16:9) thumbnail from the video directly
+          // This will properly show letterboxing/pillarboxing as it appears on the display
+          await new Promise<void>((resolve, reject) => {
+            ffmpeg(absoluteFilePath)
+              .seekInput(videoMetadata.duration ? videoMetadata.duration * 0.3 : 2) // Get frame at 30% of video
+              .outputOptions([
+                '-vframes', '1',
+                '-vf', 'scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2:black',
+                '-q:v', '2'
+              ])
+              .output(displayThumbPath)
+              .on('end', resolve)
+              .on('error', reject)
+              .run();
+          });
           
           // Save display thumbnail
           const displayThumbStats = await fs.stat(displayThumbPath);
@@ -391,11 +407,12 @@ export class FileStorageService {
         });
       }
       
-      // Update content with metadata
+      // Update content with metadata and duration
       await prisma.content.update({
         where: { id: contentId },
         data: {
           metadata: metadata as any,
+          duration: metadata.duration ? Math.round(metadata.duration) : null,
           processingStatus: ProcessingStatus.COMPLETED,
         },
       });

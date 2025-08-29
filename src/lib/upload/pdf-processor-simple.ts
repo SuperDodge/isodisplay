@@ -1,11 +1,30 @@
 /**
- * Simple PDF Processor with minimal dependencies
- * Falls back gracefully when thumbnail generation fails
+ * PDF Processor with thumbnail generation
  */
 
 import { PDFDocument } from 'pdf-lib';
 import fs from 'fs/promises';
 import path from 'path';
+import sharp from 'sharp';
+import { createCanvas } from 'canvas';
+
+// Dynamic import for pdfjs-dist to avoid SSR issues
+let pdfjsLib: any;
+
+async function loadPdfJs() {
+  if (!pdfjsLib) {
+    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    pdfjsLib = pdfjs;
+    
+    // Set worker path for Node.js environment
+    const workerSrc = path.join(
+      process.cwd(),
+      'node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs'
+    );
+    pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
+  }
+  return pdfjsLib;
+}
 
 /**
  * Get PDF metadata using pdf-lib
@@ -43,9 +62,7 @@ export async function getPdfMetadata(pdfPath: string): Promise<any> {
 }
 
 /**
- * Generate PDF thumbnail - simplified version
- * In production with Docker, actual thumbnail generation will work
- * For now, we'll just create placeholder files
+ * Generate PDF thumbnail using pdfjs-dist and canvas
  */
 export async function generatePdfThumbnail(
   pdfPath: string,
@@ -59,16 +76,120 @@ export async function generatePdfThumbnail(
     backgroundColor?: string;
   } = {}
 ): Promise<void> {
-  // For now, we'll just copy a placeholder or skip thumbnail generation
-  // The actual thumbnail generation will work in Docker with proper dependencies
-  console.log(`PDF thumbnail generation placeholder for: ${pdfPath}`);
-  
-  // Create an empty file as a placeholder
-  // The frontend will fall back to showing a PDF icon
+  const {
+    width = 1920,
+    height = 1080,
+    page = 1,
+    format = 'jpeg',
+    quality = 85,
+    backgroundColor = '#ffffff'
+  } = options;
+
   try {
-    await fs.writeFile(outputPath, Buffer.from(''));
+    // Load PDF.js
+    const pdfjs = await loadPdfJs();
+    
+    // Read PDF file
+    const data = await fs.readFile(pdfPath);
+    const uint8Array = new Uint8Array(data);
+    
+    // Load PDF document
+    const loadingTask = pdfjs.getDocument({
+      data: uint8Array,
+      useSystemFonts: true,
+    });
+    const pdfDoc = await loadingTask.promise;
+    
+    // Get the specified page
+    const pdfPage = await pdfDoc.getPage(page);
+    
+    // Get page dimensions
+    const viewport = pdfPage.getViewport({ scale: 1.0 });
+    
+    // Calculate scale to fit within target dimensions
+    const scaleX = width / viewport.width;
+    const scaleY = height / viewport.height;
+    const scale = Math.min(scaleX, scaleY);
+    
+    // Get scaled viewport
+    const scaledViewport = pdfPage.getViewport({ scale });
+    
+    // Create canvas with target dimensions
+    const canvas = createCanvas(width, height);
+    const context = canvas.getContext('2d');
+    
+    // Fill background
+    context.fillStyle = backgroundColor;
+    context.fillRect(0, 0, width, height);
+    
+    // Center the PDF on canvas
+    const offsetX = (width - scaledViewport.width) / 2;
+    const offsetY = (height - scaledViewport.height) / 2;
+    
+    // Save context state and apply offset
+    context.save();
+    context.translate(offsetX, offsetY);
+    
+    // Render PDF page to canvas
+    const renderContext = {
+      canvasContext: context,
+      viewport: scaledViewport,
+    };
+    
+    await pdfPage.render(renderContext).promise;
+    
+    // Restore context state
+    context.restore();
+    
+    // Convert canvas to buffer
+    const buffer = canvas.toBuffer('image/png');
+    
+    // Use sharp to convert to desired format and quality
+    await sharp(buffer)
+      .jpeg({ quality: format === 'jpeg' ? quality : undefined })
+      .png({ quality: format === 'png' ? quality : undefined })
+      .toFile(outputPath);
+    
+    console.log(`Generated PDF thumbnail: ${outputPath}`);
+    
+    // Cleanup
+    await pdfDoc.cleanup();
+    
   } catch (error) {
-    console.error('Failed to create placeholder thumbnail:', error);
+    console.error('Failed to generate PDF thumbnail:', error);
+    
+    // Fallback: Create a simple placeholder image with sharp
+    try {
+      const placeholder = await sharp({
+        create: {
+          width,
+          height,
+          channels: 3,
+          background: backgroundColor || '#f0f0f0'
+        }
+      })
+      .composite([{
+        input: Buffer.from(`
+          <svg width="${width}" height="${height}">
+            <rect width="${width}" height="${height}" fill="${backgroundColor || '#f0f0f0'}"/>
+            <text x="50%" y="50%" text-anchor="middle" dy=".3em" 
+                  font-family="Arial" font-size="48" fill="#999">
+              PDF
+            </text>
+          </svg>
+        `),
+        top: 0,
+        left: 0
+      }])
+      .toFormat(format, { quality })
+      .toFile(outputPath);
+      
+      console.log(`Created placeholder thumbnail: ${outputPath}`);
+    } catch (placeholderError) {
+      console.error('Failed to create placeholder:', placeholderError);
+      // Last resort: create empty file
+      await fs.writeFile(outputPath, Buffer.from(''));
+    }
   }
 }
 
@@ -94,22 +215,40 @@ export async function processPdfFile(
     // Ensure output directory exists
     await fs.mkdir(outputDir, { recursive: true });
     
-    // For now, return empty thumbnails array
-    // The frontend will handle this by showing PDF icons
+    // Generate thumbnails for each size
     const thumbnails: Array<{ size: string; path: string; width: number; height: number }> = [];
     
-    console.log('PDF processed with metadata:', metadata);
-    console.log('Note: Thumbnail generation is disabled in development. PDF icon will be shown.');
+    for (const size of sizes) {
+      const outputPath = path.join(outputDir, `${size.name}.jpg`);
+      
+      await generatePdfThumbnail(pdfPath, outputPath, {
+        width: size.width,
+        height: size.height,
+        format: 'jpeg',
+        quality: 85,
+        backgroundColor: '#ffffff'
+      });
+      
+      thumbnails.push({
+        size: size.name,
+        path: outputPath,
+        width: size.width,
+        height: size.height
+      });
+    }
     
     return {
       metadata,
       thumbnails
     };
+    
   } catch (error) {
-    console.error('Failed to process PDF file:', error);
-    // Return minimal data on error
+    console.error('Failed to process PDF:', error);
+    
+    // Return metadata with empty thumbnails on error
+    const metadata = await getPdfMetadata(pdfPath).catch(() => ({ pages: 1 }));
     return {
-      metadata: { pages: 1 },
+      metadata,
       thumbnails: []
     };
   }

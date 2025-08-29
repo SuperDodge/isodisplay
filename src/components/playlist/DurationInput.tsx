@@ -183,7 +183,7 @@ export function DurationInput({
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          className={`w-20 h-7 px-2 text-center bg-white/10 border-white/20 text-white text-sm ${
+          className={`w-20 !h-10 px-2 text-center bg-white/10 border-white/20 text-white text-sm ${
             error ? 'border-red-500' : ''
           }`}
           placeholder="0:00"

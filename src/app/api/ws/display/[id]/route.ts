@@ -6,9 +6,9 @@ const connections = new Map<string, Set<WebSocket>>();
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const displayId = params.id;
+  const { id: displayId } = await params;
 
   // Verify display exists
   const display = await prisma.display.findUnique({

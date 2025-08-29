@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { displayService } from '@/lib/services/display-service';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
 // POST /api/displays/[id]/heartbeat - Update display heartbeat
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params;
+    
     // Get client IP and user agent
     const ip = request.headers.get('x-forwarded-for') || 
                request.headers.get('x-real-ip') || 
@@ -17,7 +16,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     // Update last seen
-    await displayService.updateLastSeen(params.id, ip, userAgent);
+    await displayService.updateLastSeen(id, ip, userAgent);
 
     return NextResponse.json({ 
       status: 'ok',

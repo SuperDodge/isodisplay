@@ -133,7 +133,7 @@ export default function RealtimeAlerts() {
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
+    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20 h-[500px] overflow-y-auto custom-scrollbar flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <Bell className="text-brand-orange-500 mr-3" size={24} />
@@ -160,7 +160,7 @@ export default function RealtimeAlerts() {
           <div className="text-white/60">No alerts - system healthy</div>
         </div>
       ) : (
-        <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
+        <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar">
           {/* Active Alerts */}
           {activeAlerts.map((alert) => (
             <div

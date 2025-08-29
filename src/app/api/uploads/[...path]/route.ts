@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
+import { getCurrentUser } from '@/lib/auth-helpers';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
+    // Check if user is authenticated
+    const user = await getCurrentUser();
+    if (!user) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const { path: pathSegments } = await params;
     
     if (!pathSegments || pathSegments.length === 0) {
@@ -26,6 +34,28 @@ export async function GET(
     
     if (!resolvedPath.startsWith(uploadsDir)) {
       return new NextResponse('Forbidden', { status: 403 });
+    }
+
+    // Check if this is a content file and validate access permissions
+    const filePathStr = pathSegments.join('/');
+    const content = await prisma.content.findFirst({
+      where: {
+        OR: [
+          { filePath: { contains: filePathStr } },
+          { filePath: { endsWith: filePathStr } }
+        ]
+      }
+    });
+
+    if (content) {
+      // Check if user has permission to view this content
+      const hasPermission = user.permissions?.includes('CONTENT_VIEW') || 
+                          user.permissions?.includes('USER_CONTROL') ||
+                          content.uploadedBy === user.id;
+      
+      if (!hasPermission) {
+        return new NextResponse('Access denied', { status: 403 });
+      }
     }
 
     try {

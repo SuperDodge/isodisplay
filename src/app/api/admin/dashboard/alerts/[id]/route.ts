@@ -4,7 +4,7 @@ import { getCurrentUser, hasPermission } from '@/lib/auth-helpers';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
@@ -12,7 +12,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const alertId = params.id;
+    const { id: alertId } = await params;
     
     // In production, you'd delete the alert from your database
     // For now, we'll just return success

@@ -6,6 +6,7 @@ import { Playlist, PlaylistItem } from '@/types/playlist';
 import TransitionContainer from './TransitionContainer';
 import { ImageRenderer } from './renderers/ImageRenderer';
 import { VideoRenderer } from './renderers/VideoRenderer';
+import VerticalVideoRenderer from './renderers/VerticalVideoRenderer';
 import { PDFRenderer } from './renderers/PDFRenderer';
 import { TextRenderer } from './renderers/TextRenderer';
 import { YouTubeRenderer } from './renderers/YouTubeRenderer';
@@ -17,7 +18,7 @@ import type {
   PlaylistUpdateMessage,
   DisplayControlMessage,
   EmergencyStopMessage,
-} from '@/lib/services/websocket-service';
+} from '@/types/websocket';
 
 interface DisplayPlayerProps {
   display: Display;
@@ -37,6 +38,18 @@ export function DisplayPlayer({ display, playlist: initialPlaylist }: DisplayPla
   const timerRef = useRef<NodeJS.Timeout>();
   const viewStartTimeRef = useRef<number>(Date.now());
   const { isFullscreen, enterFullscreen, exitFullscreen } = useFullscreen(playerRef);
+
+  // Safety check - if no playlist provided, show error
+  if (!initialPlaylist) {
+    return (
+      <div className="h-screen w-screen bg-black flex items-center justify-center text-white">
+        <div className="text-center">
+          <h2 className="text-2xl mb-4">No Playlist Assigned</h2>
+          <p className="text-gray-400">Please assign a playlist to this display from the admin interface.</p>
+        </div>
+      </div>
+    );
+  }
 
   // Performance optimization for Raspberry Pi
   const { metrics, quality, optimizer } = usePerformanceOptimization();
@@ -98,12 +111,12 @@ export function DisplayPlayer({ display, playlist: initialPlaylist }: DisplayPla
   // Track view analytics
   const trackView = useCallback(
     async (completed: boolean, skipped: boolean = false) => {
-      if (!currentItem) return;
+      if (!currentItem || !playlist) return;
 
       const viewDuration = Math.round((Date.now() - viewStartTimeRef.current) / 1000);
 
       try {
-        await fetch('/api/analytics/view', {
+        await fetch('/api/tracking/view', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -120,12 +133,12 @@ export function DisplayPlayer({ display, playlist: initialPlaylist }: DisplayPla
         console.error('Failed to track view:', error);
       }
     },
-    [currentItem, display.id, playlist.id]
+    [currentItem, display.id, playlist?.id]
   );
 
   // Move to next item function with performance optimization
   const moveToNextItem = useCallback(() => {
-    if (playlist.items.length === 0) return;
+    if (!playlist || playlist.items.length === 0) return;
 
     // Track the current item view as completed
     trackView(true, false);
@@ -224,10 +237,17 @@ export function DisplayPlayer({ display, playlist: initialPlaylist }: DisplayPla
       // Preload upcoming content for smooth transitions
       const preloadUrls = playlist.items
         .slice(0, 3)
-        .map((item) => item.content.fileUrl)
-        .filter(Boolean);
+        .map((item) => {
+          // Skip YouTube content from preloading
+          if (item.contentType === 'youtube') return null;
+          // Check if content exists and has fileUrl
+          return item.content?.fileUrl;
+        })
+        .filter(Boolean) as string[];
 
-      optimizer.preloadContent(preloadUrls);
+      if (preloadUrls.length > 0) {
+        optimizer.preloadContent(preloadUrls);
+      }
     }
   }, [playlist, optimizer, display.id]);
 
@@ -310,7 +330,7 @@ export function DisplayPlayer({ display, playlist: initialPlaylist }: DisplayPla
       case 'image':
         return <ImageRenderer item={item} />;
       case 'video':
-        return <VideoRenderer item={item} onEnded={moveToNextItem} />;
+        return <VerticalVideoRenderer item={item} isPlaying={isPlaying} onEnded={moveToNextItem} />;
       case 'pdf':
         return <PDFRenderer item={item} />;
       case 'youtube':

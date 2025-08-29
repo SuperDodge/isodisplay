@@ -24,6 +24,7 @@ model User {
   fileVersions    FileVersion[]
   playlists       Playlist[]
   sharedPlaylists Playlist[]    @relation("SharedPlaylists")
+  alerts          Alert[]
 
   @@index([email])
   @@index([username])
@@ -103,20 +104,22 @@ model PlaylistItem {
 }
 
 model Display {
-  id          String             @id @default(uuid())
-  name        String
-  urlSlug     String             @unique
-  playlistId  String?
-  resolution  String             @default("1920x1080")
-  orientation DisplayOrientation @default(LANDSCAPE)
-  lastSeen    DateTime?
-  isOnline    Boolean            @default(false)
-  location    String?
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  playlist    Playlist?          @relation(fields: [playlistId], references: [id])
-  errorLogs   ErrorLog[]
-  viewLogs    ViewLog[]
+  id            String             @id @default(uuid())
+  name          String
+  urlSlug       String             @unique
+  playlistId    String?
+  resolution    String             @default("1920x1080")
+  orientation   DisplayOrientation @default(LANDSCAPE)
+  lastSeen      DateTime?
+  isOnline      Boolean            @default(false)
+  location      String?
+  clockSettings Json               @default("{}")
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  playlist      Playlist?          @relation(fields: [playlistId], references: [id])
+  errorLogs     ErrorLog[]
+  viewLogs      ViewLog[]
+  alerts        Alert[]
 
   @@index([urlSlug])
   @@index([isOnline])
@@ -203,6 +206,31 @@ model Tag {
   @@index([name])
 }
 
+model Alert {
+  id          String        @id @default(uuid())
+  type        AlertType
+  category    AlertCategory
+  title       String
+  message     String        @db.Text
+  metadata    Json?
+  displayId   String?
+  display     Display?      @relation(fields: [displayId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resolved    Boolean       @default(false)
+  resolvedAt  DateTime?
+  resolvedBy  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([type])
+  @@index([category])
+  @@index([displayId])
+  @@index([userId])
+  @@index([resolved])
+  @@index([createdAt])
+}
+
 enum Permission {
   CONTENT_CREATE
   PLAYLIST_ASSIGN
@@ -256,4 +284,19 @@ enum UserStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
+}
+
+enum AlertType {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+enum AlertCategory {
+  DISPLAY
+  CONTENT
+  PLAYLIST
+  SYSTEM
+  USER
 }

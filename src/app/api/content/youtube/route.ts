@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma';
 import { ContentType } from '@/generated/prisma';
 import { z } from 'zod';
 import { fetchYouTubeVideoInfoWithAPI } from '@/lib/youtube-api';
+import { generateDisplayThumbnailFromUrl } from '@/lib/upload/image-processor';
+import path from 'path';
+import { promises as fs } from 'fs';
 
 // Validation schema for YouTube content
 const YouTubeContentSchema = z.object({
@@ -142,14 +145,48 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Generate a proper display thumbnail with correct letterboxing/pillarboxing
+    // Create a directory for YouTube thumbnails
+    const projectRoot = process.cwd() === '/app' ? '/Users/sronnie/Documents/Coding/IsoDisplay' : process.cwd();
+    const youtubeThumbnailDir = path.join(projectRoot, 'uploads', 'youtube-thumbnails');
+    await fs.mkdir(youtubeThumbnailDir, { recursive: true });
+    
+    // Generate display thumbnail filename
+    const displayThumbFilename = `${videoId}-display-${Date.now()}.jpg`;
+    const displayThumbPath = path.join(youtubeThumbnailDir, displayThumbFilename);
+    
+    // Generate the properly formatted display thumbnail
+    try {
+      await generateDisplayThumbnailFromUrl(
+        finalThumbnailUrl,
+        displayThumbPath,
+        '#000000'
+      );
+      console.log('Generated display thumbnail for YouTube video:', displayThumbPath);
+    } catch (thumbError) {
+      console.error('Failed to generate display thumbnail, using original URL:', thumbError);
+    }
+    
     // Create multiple thumbnail entries for different sizes
     const thumbnailSizes = [
-      { size: 'display', url: finalThumbnailUrl, width: 480, height: 360 },
-      { size: 'medium', url: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`, width: 320, height: 180 },
-      { size: 'small', url: `https://img.youtube.com/vi/${videoId}/default.jpg`, width: 120, height: 90 },
+      { size: 'display', url: displayThumbPath, width: 640, height: 360, isLocal: true },
+      { size: 'medium', url: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`, width: 320, height: 180, isLocal: false },
+      { size: 'small', url: `https://img.youtube.com/vi/${videoId}/default.jpg`, width: 120, height: 90, isLocal: false },
     ];
 
     for (const thumb of thumbnailSizes) {
+      let fileSize = BigInt(0);
+      
+      // If it's a local file, get the actual file size
+      if (thumb.isLocal) {
+        try {
+          const stats = await fs.stat(thumb.url);
+          fileSize = BigInt(stats.size);
+        } catch (e) {
+          console.error('Failed to get file size for local thumbnail:', e);
+        }
+      }
+      
       await prisma.fileThumbnail.create({
         data: {
           contentId: content.id,
@@ -157,7 +194,7 @@ export async function POST(request: NextRequest) {
           width: thumb.width,
           height: thumb.height,
           filePath: thumb.url,
-          fileSize: BigInt(0), // External URL, no file size
+          fileSize: fileSize,
           format: 'jpg',
         },
       });

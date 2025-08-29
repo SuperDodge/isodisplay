@@ -32,6 +32,7 @@ export default function PlaylistsPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [playlistToDelete, setPlaylistToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [hoveredSegment, setHoveredSegment] = useState<{ playlistId: string; contentType: string; mouseX?: number } | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -103,6 +104,62 @@ export default function PlaylistsPage() {
     setPlaylistToDelete(null);
   };
 
+  // Calculate content type distribution for a playlist
+  const getContentTypeDistribution = (playlist: Playlist) => {
+    if (!playlist.items || playlist.items.length === 0) {
+      return [];
+    }
+
+    const typeCounts: Record<string, number> = {};
+    playlist.items.forEach(item => {
+      const type = item.contentType || 'image';
+      typeCounts[type] = (typeCounts[type] || 0) + 1;
+    });
+
+    const total = playlist.items.length;
+    const distribution = Object.entries(typeCounts).map(([type, count]) => ({
+      type,
+      count,
+      percentage: (count / total) * 100,
+      color: getContentTypeColor(type),
+      label: getContentTypeLabel(type)
+    }));
+
+    return distribution;
+  };
+
+  const getContentTypeColor = (type: string) => {
+    switch (type) {
+      case 'video':
+        return 'bg-purple-500';
+      case 'youtube':
+        return 'bg-red-500';
+      case 'pdf':
+        return 'bg-blue-500';
+      case 'text':
+        return 'bg-yellow-500';
+      case 'image':
+      default:
+        return 'bg-green-500';
+    }
+  };
+
+  const getContentTypeLabel = (type: string) => {
+    switch (type) {
+      case 'youtube':
+        return 'YouTube';
+      case 'pdf':
+        return 'PDF';
+      case 'text':
+        return 'Text';
+      case 'video':
+        return 'Video';
+      case 'image':
+      default:
+        return 'Image';
+    }
+  };
+
   const handleDuplicate = async (playlistId: string) => {
     try {
       const response = await secureFetch(`/api/playlists/${playlistId}/duplicate`, {
@@ -111,11 +168,17 @@ export default function PlaylistsPage() {
       
       if (response.ok) {
         fetchPlaylists(); // Refresh the list
+        setSuccessMessage('Playlist duplicated successfully');
+        setTimeout(() => setSuccessMessage(''), 4000);
       } else {
         console.error('Failed to duplicate playlist');
+        setErrorMessage('Failed to duplicate playlist');
+        setTimeout(() => setErrorMessage(''), 4000);
       }
     } catch (error) {
       console.error('Error duplicating playlist:', error);
+      setErrorMessage('An error occurred while duplicating the playlist');
+      setTimeout(() => setErrorMessage(''), 4000);
     }
   };
 
@@ -153,9 +216,12 @@ export default function PlaylistsPage() {
       
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Playlists</h1>
-          <p className="text-white/70">Create and manage content playlists for your displays</p>
+        <div className="flex items-center gap-3 mb-8">
+          <ListVideo className="w-12 h-12 text-brand-orange-500" />
+          <div>
+            <h1 className="text-4xl font-bold text-white uppercase tracking-wide font-['Made_Tommy']">Playlists</h1>
+            <p className="text-white/70">Create and manage content playlists for your displays</p>
+          </div>
         </div>
 
         {/* Actions Bar */}
@@ -203,54 +269,125 @@ export default function PlaylistsPage() {
               )
               .map((playlist) => (
                 <Card key={playlist.id} className="bg-white/10 backdrop-blur-md border-white/20">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <ListVideo className="w-5 h-5 text-brand-orange-500" />
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={() => handleDuplicate(playlist.id)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-white hover:bg-white/10"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          onClick={() => router.push(`/playlists/${playlist.id}/edit`)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-white hover:bg-white/10"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteClick(playlist)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-400 hover:bg-red-500/10"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                  <CardContent className="p-6 flex flex-col h-full">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-white mb-4">{playlist.name}</h3>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2 text-white/70">
+                          <Clock className="w-5 h-5" />
+                          <span className="text-base">{playlist.items?.length || 0} items</span>
+                          
+                          {/* Content Type Distribution Bar */}
+                          {playlist.items && playlist.items.length > 0 && (
+                            <div className="flex-1 ml-2 relative" style={{ zIndex: 1 }}>
+                              <div className="relative h-4 bg-white/10 rounded-full flex" style={{ overflow: 'visible' }}>
+                                {(() => {
+                                  const distribution = getContentTypeDistribution(playlist);
+                                  let cumulativePercentage = 0;
+                                  
+                                  return distribution.map((segment, index) => {
+                                    const segmentStart = cumulativePercentage;
+                                    const segmentMiddle = cumulativePercentage + (segment.percentage / 2);
+                                    cumulativePercentage += segment.percentage;
+                                    
+                                    return (
+                                      <div
+                                        key={segment.type}
+                                        className={`group relative ${segment.color} transition-opacity duration-200 cursor-pointer ${
+                                          index === 0 ? 'rounded-l-full' : ''
+                                        } ${
+                                          index === distribution.length - 1 ? 'rounded-r-full' : ''
+                                        } ${
+                                          hoveredSegment?.playlistId === playlist.id && hoveredSegment?.contentType !== segment.type
+                                            ? 'opacity-30'
+                                            : ''
+                                        }`}
+                                        style={{ width: `${segment.percentage}%` }}
+                                        onMouseEnter={(e) => {
+                                          const rect = e.currentTarget.getBoundingClientRect();
+                                          const x = rect.left + rect.width / 2;
+                                          setHoveredSegment({ 
+                                            playlistId: playlist.id, 
+                                            contentType: segment.type,
+                                            mouseX: x
+                                          });
+                                        }}
+                                        onMouseLeave={() => setHoveredSegment(null)}
+                                      >
+                                        {/* Tooltip for this segment - using fixed positioning */}
+                                        <div 
+                                          className={`absolute bottom-full mb-2 px-3 py-2 bg-gray-900/90 text-white text-xs rounded-lg pointer-events-none whitespace-nowrap transition-opacity duration-200 ${
+                                            hoveredSegment?.playlistId === playlist.id && 
+                                            hoveredSegment?.contentType === segment.type 
+                                              ? 'opacity-100' 
+                                              : 'opacity-0'
+                                          }`}
+                                          style={{
+                                            left: '50%',
+                                            transform: 'translateX(-50%)',
+                                            zIndex: 9999
+                                          }}
+                                        >
+                                          <div className="font-semibold">{segment.label}</div>
+                                          <div className="mt-1">
+                                            {segment.count} {segment.count === 1 ? 'item' : 'items'} ({Math.round(segment.percentage)}%)
+                                          </div>
+                                          {/* Arrow */}
+                                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px w-2 h-2 bg-gray-900/90 rotate-45"></div>
+                                        </div>
+                                      </div>
+                                    );
+                                  });
+                                })()}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-white/70">
+                          <Play className="w-5 h-5" />
+                          <span className="text-base">
+                            {playlist.displays?.length || 0} {(playlist.displays?.length || 0) === 1 ? 'display' : 'displays'}
+                            {playlist.displays && playlist.displays.length > 0 && 
+                              ` (${playlist.displays.map(d => d.name).join(', ')})`
+                            }
+                          </span>
+                        </div>
                       </div>
-                    </div>
 
-                    <h3 className="text-xl font-semibold text-white mb-2">{playlist.name}</h3>
-                    
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2 text-white/70">
-                        <Clock className="w-4 h-4" />
-                        <span>{playlist.items?.length || 0} items</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-white/70">
-                        <Play className="w-4 h-4" />
-                        <span>{playlist.displays?.length || 0} displays</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 pt-4 border-t border-white/10">
-                      <p className="text-xs text-white/50">
+                      <p className="text-xs text-white/50 mb-4">
                         Created by {playlist.creator?.username || 'Unknown'}
                       </p>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-4 border-t border-white/10">
+                      <Button
+                        onClick={() => handleDuplicate(playlist.id)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-white hover:bg-white/10"
+                        title="Duplicate playlist"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        onClick={() => router.push(`/playlists/${playlist.id}/edit`)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-white hover:bg-white/10"
+                        title="Edit playlist"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteClick(playlist)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-400 hover:bg-red-500/10"
+                        title="Delete playlist"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>

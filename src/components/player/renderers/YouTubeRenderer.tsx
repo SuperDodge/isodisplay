@@ -13,6 +13,7 @@ export function YouTubeRenderer({ item, onEnded }: YouTubeRendererProps) {
   const playerRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isVertical, setIsVertical] = useState(false);
 
   useEffect(() => {
     // Extract video ID from metadata or URL
@@ -92,6 +93,32 @@ export function YouTubeRenderer({ item, onEnded }: YouTubeRendererProps) {
         onReady: (event: any) => {
           setIsReady(true);
 
+          // Check if it's a vertical video (Shorts)
+          // YouTube Shorts are typically 9:16 aspect ratio
+          const player = event.target;
+          const videoData = player.getVideoData();
+          
+          // Check video title or URL for "Shorts" indicator
+          const videoUrl = player.getVideoUrl();
+          const videoTitle = videoData.title || '';
+          const isShort = videoUrl.includes('/shorts/') || videoTitle.includes('#shorts') || videoTitle.includes('#short');
+          
+          // Also check duration - Shorts are typically under 60 seconds
+          const videoDuration = player.getDuration();
+          const isShortDuration = videoDuration > 0 && videoDuration <= 60;
+          
+          // Detect vertical video/Shorts
+          setTimeout(() => {
+            try {
+              // YouTube Shorts can be detected by URL pattern or duration
+              const isVert = isShort || isShortDuration;
+              console.log('YouTube video check - URL:', videoUrl, 'Duration:', videoDuration, 'Is Short:', isShort, 'Is vertical:', isVert);
+              setIsVertical(isVert);
+            } catch (e) {
+              console.log('Error in vertical detection:', e);
+            }
+          }, 500);
+
           // Ensure video plays (fallback for autoplay issues)
           event.target.playVideo();
 
@@ -157,13 +184,15 @@ export function YouTubeRenderer({ item, onEnded }: YouTubeRendererProps) {
   }
 
   return (
-    <div className="w-full h-full bg-black flex items-center justify-center">
+    <div className="relative w-full h-full bg-black overflow-hidden">
+      {/* Main video container */}
       <div
         ref={containerRef}
-        className="w-full h-full"
-        style={{ maxWidth: '100%', maxHeight: '100%' }}
+        className="w-full h-full flex items-center justify-center"
       />
-      {!isReady && <div className="absolute inset-0 bg-black" />}
+      
+      {/* Loading overlay */}
+      {!isReady && <div className="absolute inset-0 bg-black z-20" />}
     </div>
   );
 }

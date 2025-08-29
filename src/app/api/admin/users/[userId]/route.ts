@@ -16,7 +16,7 @@ const updateUserSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const user = await getCurrentUser();
@@ -25,7 +25,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const targetUser = await userDb.findById(params.userId);
+    const { userId } = await params;
+    const targetUser = await userDb.findById(userId);
     
     if (!targetUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -43,7 +44,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const user = await getCurrentUser();
@@ -52,19 +53,20 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { userId } = await params;
     const body = await request.json();
     const validatedData = updateUserSchema.parse(body);
 
     // Prevent users from modifying their own permissions
     const currentUser = await userDb.findByEmail(user.email!);
-    if (currentUser?.id === params.userId && validatedData.permissions) {
+    if (currentUser?.id === userId && validatedData.permissions) {
       return NextResponse.json(
         { error: 'Cannot modify your own permissions' },
         { status: 403 }
       );
     }
 
-    const updatedUser = await userDb.update(params.userId, validatedData);
+    const updatedUser = await userDb.update(userId, validatedData);
     
     if (!updatedUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -89,7 +91,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const user = await getCurrentUser();
@@ -98,16 +100,17 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { userId } = await params;
     // Prevent users from deleting themselves
     const currentUser = await userDb.findByEmail(user.email!);
-    if (currentUser?.id === params.userId) {
+    if (currentUser?.id === userId) {
       return NextResponse.json(
         { error: 'Cannot delete your own account' },
         { status: 403 }
       );
     }
 
-    const deleted = await userDb.delete(params.userId);
+    const deleted = await userDb.delete(userId);
     
     if (!deleted) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });

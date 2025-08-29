@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
+import { Input } from '@/components/ui/input';
 
 // Configure PDF.js worker
 if (typeof window !== 'undefined') {
@@ -204,13 +205,13 @@ export function PDFViewer({
         </button>
 
         <div className="flex items-center gap-2 text-white">
-          <input
+          <Input
             type="number"
             min="1"
             max={numPages}
             value={currentPage}
             onChange={(e) => goToPage(parseInt(e.target.value) || 1)}
-            className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded text-center"
+            className="w-16 text-center !h-8"
           />
           <span>/</span>
           <span>{numPages}</span>

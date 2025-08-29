@@ -2,7 +2,6 @@
 
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { GripVertical, Trash2, Copy, Clock, Sparkles } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Playlist, PlaylistItem } from '@/types/playlist';
 import PlaylistItemCard from './PlaylistItemCard';
 
@@ -79,15 +78,13 @@ export function PlaylistWorkspace({
       </div>
 
       {/* Playlist Items */}
-      <ScrollArea className="flex-1 p-4">
+      <div className="flex-1 overflow-y-auto">
         <Droppable droppableId="playlist-items">
-          {(provided, snapshot) => (
+          {(provided) => (
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className={`space-y-3 min-h-full transition-colors ${
-                snapshot.isDraggingOver ? 'bg-white/5 rounded-lg' : ''
-              }`}
+              className="space-y-3 min-h-full p-4"
             >
               {playlist.items.map((item, index) => (
                 <Draggable
@@ -99,16 +96,14 @@ export function PlaylistWorkspace({
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className={`transition-all ${
-                        snapshot.isDragging
-                          ? 'rotate-2 scale-105 shadow-2xl'
-                          : ''
-                      }`}
+                      {...provided.dragHandleProps}
+                      style={provided.draggableProps.style}
+                      className={snapshot.isDragging ? 'dragging-item' : ''}
                     >
                       <PlaylistItemCard
                         item={item}
                         index={index}
-                        dragHandleProps={provided.dragHandleProps}
+                        dragHandleProps={null}
                         onUpdate={(updates) => onUpdateItem(item.id, updates)}
                         onRemove={() => onRemoveItem(item.id)}
                         onDuplicate={() => onDuplicateItem(item.id)}
@@ -121,7 +116,7 @@ export function PlaylistWorkspace({
             </div>
           )}
         </Droppable>
-      </ScrollArea>
+      </div>
     </div>
   );
 }

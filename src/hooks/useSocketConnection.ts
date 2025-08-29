@@ -35,7 +35,7 @@ export function useSocketConnection({
     if (!enabled || !displayId || socketRef.current?.connected) return;
 
     socketRef.current = io({
-      path: '/api/socket',
+      path: '/socket.io',
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 10,
@@ -74,12 +74,16 @@ export function useSocketConnection({
 
     socket.on('playlist_update', (message) => {
       console.log('Playlist update:', message);
-      onPlaylistUpdate?.(message.payload);
+      // Handle both message.data.playlist and message.payload for compatibility
+      const playlist = message.data?.playlist !== undefined ? message.data.playlist : message.payload;
+      // Always call the handler, even with null playlist (when "none" is selected)
+      onPlaylistUpdate?.(playlist);
     });
 
     socket.on('display_update', (message) => {
       console.log('Display update:', message);
-      onDisplayUpdate?.(message.payload);
+      // The message IS the display object (we're sending it directly from broadcastDisplayUpdate)
+      onDisplayUpdate?.(message);
     });
 
     socket.on('content_update', (message) => {
@@ -123,7 +127,8 @@ export function useSocketConnection({
     return () => {
       disconnect();
     };
-  }, [enabled, displayId, connect, disconnect]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, displayId]); // Don't include connect/disconnect to avoid loops
 
   return {
     isConnected,

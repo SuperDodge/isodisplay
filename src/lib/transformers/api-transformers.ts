@@ -45,6 +45,11 @@ export function apiToFrontendPlaylist(apiPlaylist: ApiPlaylistResponse): Playlis
     isActive: apiPlaylist.isActive,
     sharedWith: apiPlaylist.sharedWith || [],
     tags: apiPlaylist.tags || [],
+    displays: apiPlaylist.displays || [],
+    creator: apiPlaylist.creator ? {
+      id: apiPlaylist.creator.id,
+      username: apiPlaylist.creator.username,
+    } : undefined,
   };
 }
 
@@ -52,6 +57,20 @@ export function apiToFrontendPlaylist(apiPlaylist: ApiPlaylistResponse): Playlis
  * Transform API playlist item to frontend PlaylistItem type
  */
 export function apiToFrontendPlaylistItem(apiItem: ApiPlaylistItemResponse): PlaylistItem {
+  // Build the content object based on content type
+  let content: any = undefined;
+  
+  if (apiItem.content) {
+    content = {
+      fileUrl: apiItem.content.type === 'YOUTUBE' 
+        ? `https://www.youtube.com/watch?v=${apiItem.content.metadata?.videoId || ''}` 
+        : apiItem.content.filePath,
+      backgroundColor: apiItem.content.backgroundColor,
+      metadata: apiItem.content.metadata,
+      text: apiItem.content.metadata?.text,
+    };
+  }
+  
   return {
     id: apiItem.id,
     contentId: apiItem.contentId,
@@ -63,6 +82,10 @@ export function apiToFrontendPlaylistItem(apiItem: ApiPlaylistItemResponse): Pla
     thumbnail: getThumbnailUrl(apiItem.content),
     contentType: contentTypeToFrontend(apiItem.content?.type),
     cropSettings: apiItem.content?.cropSettings,
+    backgroundColor: apiItem.content?.backgroundColor,
+    imageScale: apiItem.content?.metadata?.imageScale,
+    imageSize: apiItem.content?.metadata?.imageSize,
+    content,
   };
 }
 
@@ -245,7 +268,7 @@ function transitionEffectToType(effect: TransitionEffect): string {
 /**
  * Convert database ContentType to frontend format
  */
-function contentTypeToFrontend(type?: ContentType | string): 'image' | 'video' | 'pdf' {
+function contentTypeToFrontend(type?: ContentType | string): 'image' | 'video' | 'pdf' | 'youtube' | 'text' {
   if (!type) return 'image';
   
   const typeStr = (typeof type === 'string' ? type : type.toString()).toUpperCase();
@@ -255,6 +278,10 @@ function contentTypeToFrontend(type?: ContentType | string): 'image' | 'video' |
       return 'video';
     case 'PDF':
       return 'pdf';
+    case 'YOUTUBE':
+      return 'youtube';
+    case 'TEXT':
+      return 'text';
     case 'IMAGE':
     default:
       return 'image';
@@ -270,6 +297,11 @@ function getThumbnailUrl(content?: ApiContentResponse): string | undefined {
   // Try to get from thumbnailUrl field
   if (content.thumbnailUrl) {
     return content.thumbnailUrl;
+  }
+  
+  // For YouTube content, check metadata for thumbnail URL
+  if (content.type === 'YOUTUBE' && content.metadata?.thumbnailUrl) {
+    return content.metadata.thumbnailUrl;
   }
   
   // Try to get from thumbnails array - prioritize display thumbnails
@@ -393,12 +425,8 @@ export function databaseToApiContent(dbContent: any): ApiContentResponse {
   // Process thumbnail URL
   let thumbnailUrl = undefined;
   
-  // For YouTube content, use the thumbnail from metadata
-  if (dbContent.type === 'YOUTUBE' && dbContent.metadata?.thumbnailUrl) {
-    thumbnailUrl = dbContent.metadata.thumbnailUrl;
-  }
-  // For other content with thumbnails
-  else if (dbContent.thumbnails && dbContent.thumbnails.length > 0) {
+  // Check for thumbnails in FileThumbnail table (including YouTube)
+  if (dbContent.thumbnails && dbContent.thumbnails.length > 0) {
     // Use display thumbnail if available, otherwise use medium or first available
     const displayThumb = dbContent.thumbnails.find((t: any) => t.size === 'display');
     const mediumThumb = dbContent.thumbnails.find((t: any) => t.size === 'medium');

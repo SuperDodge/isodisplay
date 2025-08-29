@@ -1,7 +1,7 @@
 import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import { promises as fs } from 'fs';
-import { ensureUploadDirectory } from './multer-config';
+// Removed ensureUploadDirectory import - using fs.mkdir directly
 
 // Video processing options
 export interface VideoProcessingOptions {
@@ -119,7 +119,8 @@ export async function generateVideoThumbnails(
     quality = 2,
   } = options;
 
-  await ensureUploadDirectory(outputDir);
+  // Ensure the output directory exists
+  await fs.mkdir(outputDir, { recursive: true });
 
   const metadata = await getVideoMetadata(videoPath);
   const duration = metadata.duration || 0;
@@ -254,7 +255,7 @@ export async function createVideoSprite(
 
   const totalFrames = columns * rows;
   const tempDir = path.join(path.dirname(outputPath), 'temp_frames');
-  await ensureUploadDirectory(tempDir);
+  await fs.mkdir(tempDir, { recursive: true });
 
   try {
     // Extract frames

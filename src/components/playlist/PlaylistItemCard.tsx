@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { GripVertical, Trash2, Copy, Image, Video, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { GripVertical, Trash2, Copy, Image, Video, FileText } from 'lucide-react';
+import { ContentThumbnail } from '@/components/content/ContentThumbnail';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,6 @@ export function PlaylistItemCard({
   onRemove,
   onDuplicate,
 }: PlaylistItemCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
 
   // Get icon for content type
   const getContentIcon = () => {
@@ -42,110 +41,104 @@ export function PlaylistItemCard({
 
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 overflow-hidden">
-      {/* Main Row */}
-      <div className="flex items-center gap-3 p-4">
-        {/* Drag Handle */}
-        <div
-          {...dragHandleProps}
-          className="cursor-grab active:cursor-grabbing text-white/50 hover:text-white transition"
-        >
-          <GripVertical className="w-5 h-5" />
-        </div>
-
-        {/* Index */}
-        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white text-sm font-medium">
-          {index + 1}
-        </div>
-
-        {/* Thumbnail */}
-        <div className="w-16 h-16 rounded bg-white/5 flex items-center justify-center flex-shrink-0">
-          {item.thumbnail ? (
-            <img
-              src={item.thumbnail}
-              alt={item.title}
-              className="w-full h-full object-cover rounded"
-            />
+    <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-4">
+      <div className="flex items-start gap-3">
+        {/* Left side - Drag, Index, Thumbnail */}
+        <div className="flex items-center gap-3">
+          {/* Drag Handle */}
+          {dragHandleProps ? (
+            <div
+              {...dragHandleProps}
+              className="cursor-grab active:cursor-grabbing text-white/50 hover:text-white transition mt-4"
+            >
+              <GripVertical className="w-5 h-5" />
+            </div>
           ) : (
-            <div className="text-white/30">{getContentIcon()}</div>
+            <div className="text-white/50 mt-4">
+              <GripVertical className="w-5 h-5" />
+            </div>
           )}
+
+          {/* Index */}
+          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white text-sm font-medium mt-3">
+            {index + 1}
+          </div>
+
+          {/* Thumbnail - 16:9 aspect ratio, larger */}
+          <div className="w-32 h-[72px] rounded bg-black flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <ContentThumbnail
+              type={item.contentType || 'image'}
+              thumbnailUrl={item.thumbnail}
+              name={item.title}
+              backgroundColor={item.backgroundColor || '#000000'}
+              imageScale={item.imageScale || 'contain'}
+              imageSize={item.imageSize || 100}
+            />
+          </div>
         </div>
 
-        {/* Content Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+        {/* Right side - Content info and controls */}
+        <div className="flex-1 space-y-3">
+          {/* Title Row */}
+          <div className="flex items-center gap-2 pt-1">
             <div className="text-white/70">{getContentIcon()}</div>
-            <h4 className="text-white font-medium truncate">{item.title}</h4>
-          </div>
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="text-white/50">Duration:</span>
-              <DurationInput
-                value={item.duration}
-                onChange={(value) => onUpdate({ duration: value })}
-                min={1}
-                max={3600}
-                format="auto"
-                showButtons={false}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-white/50">Transition:</span>
-              <span className="text-white">{item.transition}</span>
+            <h4 className="text-white font-medium truncate flex-1">{item.title}</h4>
+            {/* Content Type Badge */}
+            <div className={`px-2 py-0.5 rounded text-xs font-medium capitalize ${
+              item.contentType === 'video' 
+                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                : item.contentType === 'youtube'
+                  ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                  : item.contentType === 'pdf'
+                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                    : 'bg-green-500/20 text-green-300 border border-green-500/30'
+            }`}>
+              {item.contentType === 'youtube' ? 'YouTube' : item.contentType || 'image'}
             </div>
           </div>
-        </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setIsExpanded(!isExpanded)}
-            variant="ghost"
-            size="icon"
-            className="text-white/70 hover:text-white hover:bg-white/10"
-          >
-            {isExpanded ? (
-              <ChevronUp className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
-            )}
-          </Button>
-          <Button
-            onClick={onDuplicate}
-            variant="ghost"
-            size="icon"
-            className="text-white/70 hover:text-white hover:bg-white/10"
-          >
-            <Copy className="w-4 h-4" />
-          </Button>
-          <Button
-            onClick={onRemove}
-            variant="ghost"
-            size="icon"
-            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
+          {/* Controls Row */}
+          <div className="flex items-center">
+            {/* Duration */}
+            <div className="flex items-center gap-1.5">
+              <label className="text-white/50 text-xs">Duration</label>
+              {item.contentType === 'video' || item.contentType === 'youtube' ? (
+                <div className="bg-white/10 border border-white/20 rounded h-10 flex items-center justify-center w-20">
+                  <span className="text-white text-sm">
+                    {item.duration >= 3600 
+                      ? `${Math.floor(item.duration / 3600)}:${String(Math.floor((item.duration % 3600) / 60)).padStart(2, '0')}:${String(item.duration % 60).padStart(2, '0')}`
+                      : item.duration >= 60 
+                        ? `${Math.floor(item.duration / 60)}:${String(item.duration % 60).padStart(2, '0')}`
+                        : `${item.duration}s`}
+                  </span>
+                </div>
+              ) : (
+                <DurationInput
+                  value={item.duration}
+                  onChange={(value) => onUpdate({ duration: value })}
+                  min={1}
+                  max={3600}
+                  format="auto"
+                  showButtons={false}
+                  className="w-20"
+                />
+              )}
+            </div>
 
-      {/* Expanded Settings */}
-      {isExpanded && (
-        <div className="px-4 pb-4 pt-0 border-t border-white/10">
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            {/* Transition Effect */}
-            <div>
-              <label className="text-white/70 text-sm mb-2 block">
-                Transition Effect
-              </label>
+            {/* Center padding/spacer */}
+            <div className="flex-1" />
+
+            {/* Transition Effect and Duration */}
+            <div className="flex items-center gap-1.5">
+              <label className="text-white/50 text-xs">Transition</label>
               <Select
                 value={item.transition}
                 onValueChange={(value) => onUpdate({ transition: value as any })}
               >
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm w-64 [&>span]:flex [&>span]:justify-center [&>span]:w-full">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-brand-gray-900 border-white/20">
+                <SelectContent className="bg-brand-gray-900 border-white/20 max-w-md">
                   {TRANSITION_EFFECTS.map((effect) => (
                     <SelectItem
                       key={effect.value}
@@ -153,46 +146,81 @@ export function PlaylistItemCard({
                       className="text-white hover:bg-white/10"
                     >
                       <div>
-                        <div className="font-medium">{effect.label}</div>
+                        <div className="font-medium text-sm">{effect.label}</div>
                         <div className="text-xs text-white/50">{effect.description}</div>
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <span className="text-white/50 text-xs">for</span>
+              <input
+                type="text"
+                value={item.transitionDuration}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow typing decimal numbers
+                  if (/^\d*\.?\d*$/.test(value)) {
+                    const parsed = parseFloat(value);
+                    if (!isNaN(parsed) && parsed >= 0.1 && parsed <= 5) {
+                      onUpdate({ transitionDuration: parsed });
+                    } else if (value === '' || value === '.') {
+                      // Allow empty or just decimal point while typing
+                      onUpdate({ transitionDuration: parseFloat(value) || 1 });
+                    }
+                  }
+                }}
+                onBlur={(e) => {
+                  // Ensure valid value on blur
+                  const parsed = parseFloat(e.target.value);
+                  if (isNaN(parsed) || parsed < 0.1 || parsed > 5) {
+                    onUpdate({ transitionDuration: 1 });
+                  }
+                }}
+                className="bg-white/10 border border-white/20 rounded text-white text-sm text-center outline-none focus:ring-2 focus:ring-brand-orange-500 focus:ring-offset-2 focus:ring-offset-transparent focus:border-white transition-all"
+                style={{ 
+                  appearance: 'textfield',
+                  width: '2.5rem',
+                  height: '2rem',
+                  padding: '0 0.25rem'
+                }}
+                placeholder="1"
+              />
+              <span className="text-white/50 text-xs">sec</span>
             </div>
 
-            {/* Transition Duration */}
-            <div>
-              <label className="text-white/70 text-sm mb-2 block">
-                Transition Duration
-              </label>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  min="0.1"
-                  max="5"
-                  step="0.1"
-                  value={item.transitionDuration}
-                  onChange={(e) => onUpdate({ transitionDuration: parseFloat(e.target.value) || 1 })}
-                  className="bg-white/10 border-white/20 text-white"
-                />
-                <span className="text-white/50 text-sm">seconds</span>
-              </div>
+            {/* Right padding/spacer */}
+            <div className="flex-1" />
+
+            {/* Actions */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <Button
+                onClick={onDuplicate}
+                variant="ghost"
+                size="icon"
+                className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8"
+              >
+                <Copy className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                onClick={onRemove}
+                variant="ghost"
+                size="icon"
+                className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
             </div>
           </div>
 
-          {/* Crop Settings Info */}
+          {/* Crop Settings Info - inline if present */}
           {item.cropSettings && (
-            <div className="mt-4 p-3 bg-white/5 rounded">
-              <div className="text-white/70 text-sm mb-1">Crop Settings Applied</div>
-              <div className="text-white/50 text-xs">
-                Custom crop and zoom settings are configured for this content
-              </div>
+            <div className="text-white/50 text-xs">
+              Custom crop settings applied
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

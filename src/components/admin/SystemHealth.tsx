@@ -5,47 +5,76 @@ import {
   Server, 
   Database, 
   HardDrive, 
-  Cpu, 
-  MemoryStick, 
+  Users,
+  Monitor,
+  ListVideo,
+  FileImage,
   Wifi,
   CheckCircle,
   AlertTriangle,
   XCircle,
-  Activity
+  Activity,
+  TrendingUp,
+  Clock
 } from 'lucide-react';
 
-interface SystemMetrics {
+interface ApplicationHealth {
   uptime: string;
-  cpuUsage: number;
-  memoryUsage: {
-    used: number;
-    total: number;
-    percentage: number;
-  };
-  diskUsage: {
-    used: string;
-    total: string;
-    percentage: number;
-  };
-  databaseStatus: {
-    connected: boolean;
+  healthScore: number;
+  database: {
+    status: string;
     responseTime: number;
-    poolSize: number;
+    connectionPool: {
+      active: number;
+      idle: number;
+      total: number;
+    };
   };
-  networkStatus: {
-    connected: boolean;
-    latency: number;
+  displays: {
+    total: number;
+    online: number;
+    offline: number;
+    percentage: number;
+  };
+  content: {
+    total: number;
+    storageUsed: string;
+    recentUploads: number;
+    processingQueue: {
+      pending: number;
+      processing: number;
+      failed: number;
+      completed24h: number;
+    };
+  };
+  playlists: {
+    total: number;
+    active: number;
+    utilizationRate: number;
+  };
+  users: {
+    total: number;
+    active: number;
+    recentlyActive: number;
+    activityRate: number;
+  };
+  api: {
+    status: string;
+    avgResponseTime: number;
+    requestsPerMinute: number;
+    errorRate: string;
   };
   services: {
     name: string;
-    status: 'healthy' | 'warning' | 'error';
-    uptime: string;
+    status: string;
+    uptime?: string;
     responseTime?: number;
+    details?: string;
   }[];
 }
 
 export default function SystemHealth() {
-  const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
+  const [health, setHealth] = useState<ApplicationHealth | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,7 +90,7 @@ export default function SystemHealth() {
       const response = await fetch('/api/admin/dashboard/system-health');
       if (!response.ok) throw new Error('Failed to fetch system health');
       const data = await response.json();
-      setMetrics(data);
+      setHealth(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -82,36 +111,50 @@ export default function SystemHealth() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'healthy': return 'text-green-400';
-      case 'warning': return 'text-yellow-400';
-      case 'error': return 'text-red-400';
-      default: return 'text-gray-400';
-    }
+  const getHealthScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-400';
+    if (score >= 60) return 'text-yellow-400';
+    return 'text-red-400';
   };
 
-  const getUsageColor = (percentage: number) => {
-    if (percentage >= 90) return 'bg-red-500';
-    if (percentage >= 75) return 'bg-yellow-500';
-    return 'bg-green-500';
+  const getHealthScoreBg = (score: number) => {
+    if (score >= 80) return 'bg-green-500';
+    if (score >= 60) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+
+  const getPercentageColor = (percentage: number, inverse: boolean = false) => {
+    if (inverse) {
+      if (percentage <= 20) return 'bg-green-500';
+      if (percentage <= 50) return 'bg-yellow-500';
+      return 'bg-red-500';
+    }
+    if (percentage >= 80) return 'bg-green-500';
+    if (percentage >= 50) return 'bg-yellow-500';
+    return 'bg-red-500';
   };
 
   if (loading) {
     return (
       <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
         <div className="flex items-center justify-center h-64">
-          <div className="text-white/70">Loading system health...</div>
+          <div className="text-white/70">Loading application health...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
-      <div className="flex items-center mb-6">
-        <Server className="text-brand-orange-500 mr-3" size={24} />
-        <h2 className="text-xl font-bold text-white">System Health</h2>
+    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20 h-[600px] overflow-y-auto custom-scrollbar flex flex-col">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <Server className="text-brand-orange-500 mr-3" size={24} />
+          <h2 className="text-xl font-bold text-white">Application Health</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <Clock size={14} className="text-white/50" />
+          <span className="text-xs text-white/50">Uptime: {health?.uptime || 'Unknown'}</span>
+        </div>
       </div>
 
       {error && (
@@ -120,128 +163,141 @@ export default function SystemHealth() {
         </div>
       )}
 
-      {/* System Uptime */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Activity size={16} className="text-green-400 mr-2" />
-            <span className="text-white font-medium">System Uptime</span>
-          </div>
-          <span className="text-green-400 font-semibold">{metrics?.uptime || 'Unknown'}</span>
+      {/* Overall Health Score */}
+      <div className="mb-6 bg-white/5 rounded-lg p-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-white font-medium">Overall Health Score</span>
+          <span className={`text-2xl font-bold ${getHealthScoreColor(health?.healthScore || 0)}`}>
+            {health?.healthScore || 0}%
+          </span>
+        </div>
+        <div className="w-full bg-white/10 rounded-full h-3">
+          <div
+            className={`${getHealthScoreBg(health?.healthScore || 0)} h-3 rounded-full transition-all duration-500`}
+            style={{ width: `${health?.healthScore || 0}%` }}
+          />
         </div>
       </div>
 
-      {/* Resource Usage */}
-      <div className="space-y-4 mb-6">
-        {/* CPU Usage */}
+      {/* Key Metrics Grid */}
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        {/* Displays Status */}
         <div className="bg-white/5 rounded-lg p-3">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center">
-              <Cpu size={16} className="text-blue-400 mr-2" />
-              <span className="text-white text-sm">CPU Usage</span>
+              <Monitor size={14} className="text-blue-400 mr-2" />
+              <span className="text-white text-sm">Displays</span>
             </div>
-            <span className="text-white font-medium">{metrics?.cpuUsage || 0}%</span>
-          </div>
-          <div className="w-full bg-white/10 rounded-full h-2">
-            <div
-              className={`${getUsageColor(metrics?.cpuUsage || 0)} h-2 rounded-full transition-all duration-500`}
-              style={{ width: `${metrics?.cpuUsage || 0}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Memory Usage */}
-        <div className="bg-white/5 rounded-lg p-3">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center">
-              <MemoryStick size={16} className="text-purple-400 mr-2" />
-              <span className="text-white text-sm">Memory Usage</span>
-            </div>
-            <span className="text-white font-medium">
-              {metrics?.memoryUsage ? `${metrics.memoryUsage.used}GB / ${metrics.memoryUsage.total}GB` : 'N/A'}
+            <span className="text-xs text-white/70">
+              {health?.displays.online}/{health?.displays.total}
             </span>
           </div>
-          <div className="w-full bg-white/10 rounded-full h-2">
+          <div className="w-full bg-white/10 rounded-full h-1.5">
             <div
-              className={`${getUsageColor(metrics?.memoryUsage?.percentage || 0)} h-2 rounded-full transition-all duration-500`}
-              style={{ width: `${metrics?.memoryUsage?.percentage || 0}%` }}
+              className={`${getPercentageColor(health?.displays.percentage || 0)} h-1.5 rounded-full`}
+              style={{ width: `${health?.displays.percentage || 0}%` }}
             />
           </div>
         </div>
 
-        {/* Disk Usage */}
+        {/* Database Status */}
         <div className="bg-white/5 rounded-lg p-3">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center">
-              <HardDrive size={16} className="text-orange-400 mr-2" />
-              <span className="text-white text-sm">Disk Usage</span>
-            </div>
-            <span className="text-white font-medium">
-              {metrics?.diskUsage ? `${metrics.diskUsage.used} / ${metrics.diskUsage.total}` : 'N/A'}
-            </span>
-          </div>
-          <div className="w-full bg-white/10 rounded-full h-2">
-            <div
-              className={`${getUsageColor(metrics?.diskUsage?.percentage || 0)} h-2 rounded-full transition-all duration-500`}
-              style={{ width: `${metrics?.diskUsage?.percentage || 0}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Database & Network Status */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-white/5 rounded-lg p-3">
-          <div className="flex items-center justify-between mb-1">
             <div className="flex items-center">
               <Database size={14} className="text-indigo-400 mr-2" />
               <span className="text-white text-sm">Database</span>
             </div>
-            {metrics?.databaseStatus.connected ? (
+            {health?.database.status === 'healthy' ? (
               <CheckCircle size={14} className="text-green-400" />
             ) : (
               <XCircle size={14} className="text-red-400" />
             )}
           </div>
           <div className="text-xs text-white/60">
-            {metrics?.databaseStatus.responseTime}ms • Pool: {metrics?.databaseStatus.poolSize}
+            {health?.database.responseTime}ms • Pool: {health?.database.connectionPool.active}/{health?.database.connectionPool.total}
           </div>
         </div>
 
+        {/* Content Storage */}
         <div className="bg-white/5 rounded-lg p-3">
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center">
-              <Wifi size={14} className="text-cyan-400 mr-2" />
-              <span className="text-white text-sm">Network</span>
+              <FileImage size={14} className="text-orange-400 mr-2" />
+              <span className="text-white text-sm">Content</span>
             </div>
-            {metrics?.networkStatus.connected ? (
-              <CheckCircle size={14} className="text-green-400" />
-            ) : (
-              <XCircle size={14} className="text-red-400" />
-            )}
+            <span className="text-xs text-white/70">
+              {health?.content.total} files
+            </span>
           </div>
           <div className="text-xs text-white/60">
-            Latency: {metrics?.networkStatus.latency}ms
+            {health?.content.storageUsed} • {health?.content.recentUploads} new today
+          </div>
+        </div>
+
+        {/* Playlists */}
+        <div className="bg-white/5 rounded-lg p-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center">
+              <ListVideo size={14} className="text-green-400 mr-2" />
+              <span className="text-white text-sm">Playlists</span>
+            </div>
+            <span className="text-xs text-white/70">
+              {health?.playlists.active}/{health?.playlists.total}
+            </span>
+          </div>
+          <div className="text-xs text-white/60">
+            {health?.playlists.utilizationRate}% utilization
+          </div>
+        </div>
+
+        {/* User Activity */}
+        <div className="bg-white/5 rounded-lg p-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center">
+              <Users size={14} className="text-purple-400 mr-2" />
+              <span className="text-white text-sm">Users</span>
+            </div>
+            <span className="text-xs text-white/70">
+              {health?.users.active}/{health?.users.total}
+            </span>
+          </div>
+          <div className="text-xs text-white/60">
+            {health?.users.activityRate}% active (7d)
+          </div>
+        </div>
+
+        {/* API Performance */}
+        <div className="bg-white/5 rounded-lg p-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center">
+              <Activity size={14} className="text-cyan-400 mr-2" />
+              <span className="text-white text-sm">API</span>
+            </div>
+            <TrendingUp size={14} className="text-green-400" />
+          </div>
+          <div className="text-xs text-white/60">
+            {health?.api.avgResponseTime}ms • {health?.api.errorRate}% errors
           </div>
         </div>
       </div>
 
       {/* Services Status */}
-      <div>
+      <div className="flex-1 flex flex-col">
         <h3 className="text-white font-medium mb-3">Services Status</h3>
-        <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar">
-          {metrics?.services.length === 0 ? (
+        <div className="space-y-2 flex-1 overflow-y-auto custom-scrollbar">
+          {health?.services.length === 0 ? (
             <div className="text-white/50 text-sm text-center py-4">No services monitored</div>
           ) : (
-            metrics?.services.map((service, index) => (
-              <div key={index} className="flex items-center justify-between text-sm">
+            health?.services.map((service, index) => (
+              <div key={index} className="flex items-center justify-between text-sm bg-white/5 rounded p-2">
                 <div className="flex items-center">
                   {getStatusIcon(service.status)}
                   <span className="text-white ml-2">{service.name}</span>
                 </div>
                 <div className="text-white/60 text-xs">
-                  {service.uptime}
-                  {service.responseTime && ` • ${service.responseTime}ms`}
+                  {service.details || 
+                   (service.responseTime && `${service.responseTime}ms`) ||
+                   service.uptime}
                 </div>
               </div>
             ))

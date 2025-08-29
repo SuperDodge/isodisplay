@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ContentThumbnail } from '@/components/content/ContentThumbnail';
 import { apiToFrontendContent } from '@/lib/transformers/api-transformers';
 
-interface ContentItem {
+export interface ContentItem {
   id: string;
   title: string;
   type: 'image' | 'video' | 'pdf';
@@ -26,6 +26,7 @@ interface ContentLibrarySidebarProps {
   selectedIds: Set<string>;
   onSelectContent: (id: string) => void;
   onAddToPlaylist: (contentId: string, contentData: any) => void;
+  onContentLoaded?: (items: ContentItem[]) => void;
 }
 
 export function ContentLibrarySidebar({
@@ -35,6 +36,7 @@ export function ContentLibrarySidebar({
   selectedIds,
   onSelectContent,
   onAddToPlaylist,
+  onContentLoaded,
 }: ContentLibrarySidebarProps) {
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,17 +72,24 @@ export function ContentLibrarySidebar({
           };
         });
         setContentItems(transformedContent);
+        // Notify parent component of loaded content
+        if (onContentLoaded) {
+          onContentLoaded(transformedContent);
+        }
       } catch (error) {
         console.error('Error fetching content:', error);
         // Fallback to empty array on error
         setContentItems([]);
+        if (onContentLoaded) {
+          onContentLoaded([]);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchContent();
-  }, []);
+  }, []); // Only run once on mount
 
   // Filter content based on search and type
   const filteredContent = contentItems.filter(item => {
@@ -124,7 +133,7 @@ export function ContentLibrarySidebar({
   }
 
   return (
-    <ScrollArea className="h-[calc(100%-140px)]">
+    <ScrollArea className="h-full">
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-2 gap-3 p-4">
           {filteredContent.map(item => (

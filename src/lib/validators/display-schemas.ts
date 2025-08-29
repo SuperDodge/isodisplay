@@ -68,6 +68,7 @@ export const CreateDisplaySchema = z.object({
   orientation: DisplayOrientationSchema.optional().default(DisplayOrientation.LANDSCAPE),
   assignedPlaylistId: z.string().uuid('Playlist ID must be a valid UUID').optional().nullable(),
   settings: DisplaySettingsSchema.optional(),
+  clockSettings: z.any().optional(), // JSON clock configuration
 });
 
 /**
@@ -87,6 +88,7 @@ export const UpdateDisplaySchema = z.object({
   orientation: DisplayOrientationSchema.optional(),
   assignedPlaylistId: z.string().uuid('Playlist ID must be a valid UUID').optional().nullable(),
   settings: DisplaySettingsSchema.optional(),
+  clockSettings: z.any().optional(), // JSON clock configuration
 });
 
 /**

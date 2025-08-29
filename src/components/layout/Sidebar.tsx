@@ -5,16 +5,14 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import {
-  Monitor,
-  FileVideo,
+  FileImage,
   ListVideo,
-  Users,
-  Settings,
+  MonitorPlay,
+  UserRoundCog,
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Shield,
-  BarChart3,
+  Cog,
   Menu,
   X
 } from 'lucide-react';
@@ -30,7 +28,7 @@ const navItems: NavItem[] = [
   {
     name: 'Content',
     href: '/content',
-    icon: FileVideo,
+    icon: FileImage,
     permission: 'CONTENT_CREATE',
   },
   {
@@ -42,14 +40,8 @@ const navItems: NavItem[] = [
   {
     name: 'Displays',
     href: '/displays',
-    icon: Monitor,
+    icon: MonitorPlay,
     permission: 'DISPLAY_CONTROL',
-  },
-  {
-    name: 'Analytics',
-    href: '/analytics',
-    icon: BarChart3,
-    permission: 'CONTENT_CREATE',
   },
 ];
 
@@ -57,20 +49,14 @@ const adminItems: NavItem[] = [
   {
     name: 'Admin',
     href: '/admin',
-    icon: Shield,
+    icon: Cog,
     permission: 'USER_CONTROL',
   },
   {
     name: 'Users',
-    href: '/admin/users',
-    icon: Users,
+    href: '/users',
+    icon: UserRoundCog,
     permission: 'USER_CONTROL',
-  },
-  {
-    name: 'Settings',
-    href: '/admin/settings',
-    icon: Settings,
-    permission: 'SYSTEM_SETTINGS',
   },
 ];
 
@@ -126,47 +112,42 @@ export function Sidebar() {
       >
         <div className="flex flex-col h-full">
           {/* Logo/Header */}
-          <div className="p-4 border-b border-brand-orange-600">
+          <div className="p-4">
             <div className="flex items-center justify-between">
-              <Link href="/displays" className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-brand-gray-900 rounded-lg flex items-center justify-center">
-                  <Monitor className="w-6 h-6 text-white" />
+              <Link href="/displays" className="flex items-center pl-1 pr-3">
+                <div className="w-10 h-10 relative flex-shrink-0 mr-1">
+                  <img
+                    src="/brandmark.png"
+                    alt="IsoDisplay"
+                    width={40}
+                    height={40}
+                    className="object-contain w-full h-full"
+                  />
                 </div>
                 {!collapsed && (
-                  <span className="text-xl font-bold text-white">IsoDisplay</span>
+                  <div className="sidebar-brand-text">
+                    <span className="brand-large">I</span>
+                    <span className="brand-small">SO</span>
+                    <span className="brand-large">D</span>
+                    <span className="brand-small">ISPLAY</span>
+                  </div>
                 )}
               </Link>
               <button
                 onClick={() => setCollapsed(!collapsed)}
-                className="hidden lg:block p-1.5 hover:bg-brand-gray-900/50 rounded transition"
+                className="hidden lg:block p-1.5 transition-opacity hover:opacity-100 opacity-70"
               >
                 {collapsed ? (
-                  <ChevronRight className="w-5 h-5 text-white/70" />
+                  <ChevronRight className="w-5 h-5 text-white hover:text-white transition-colors" />
                 ) : (
-                  <ChevronLeft className="w-5 h-5 text-white/70" />
+                  <ChevronLeft className="w-5 h-5 text-white hover:text-white transition-colors" />
                 )}
               </button>
             </div>
           </div>
-
-          {/* User Info */}
-          {user && (
-            <div className="p-4 border-b border-brand-orange-600">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-brand-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-semibold">
-                    {user.username?.[0]?.toUpperCase() || 'U'}
-                  </span>
-                </div>
-                {!collapsed && (
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium truncate">{user.username}</p>
-                    <p className="text-white/50 text-xs truncate">{user.email}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          
+          {/* Separator below header */}
+          <div className="mx-4 my-4 border-t border-brand-orange-600" />
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto p-4">
@@ -188,7 +169,7 @@ export function Sidebar() {
                     }`}
                     title={collapsed ? item.name : undefined}
                   >
-                    <Icon className="w-5 h-5 flex-shrink-0" />
+                    <Icon className="w-6 h-6 flex-shrink-0" />
                     {!collapsed && <span>{item.name}</span>}
                   </Link>
                 );
@@ -217,7 +198,7 @@ export function Sidebar() {
                         }`}
                         title={collapsed ? item.name : undefined}
                       >
-                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        <Icon className="w-6 h-6 flex-shrink-0" />
                         {!collapsed && <span>{item.name}</span>}
                       </Link>
                     );
@@ -227,14 +208,37 @@ export function Sidebar() {
             )}
           </nav>
 
+          {/* User Info */}
+          {user && (
+            <>
+              <div className="mx-4 my-4 border-t border-brand-orange-600" />
+              <div className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-brand-gray-900 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-semibold">
+                    {user.username?.[0]?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+                {!collapsed && (
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium truncate">{user.username}</p>
+                    <p className="text-white/50 text-xs truncate">{user.email}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            </>
+          )}
+
           {/* Logout */}
-          <div className="p-4 border-t border-brand-orange-600">
+          <div className="mx-4 my-4 border-t border-brand-orange-600" />
+          <div className="p-4">
             <Link
               href="/auth/logout"
               className="flex items-center gap-3 px-3 py-2 text-white/90 hover:bg-brand-gray-900/50 hover:text-white rounded-lg transition"
               title={collapsed ? 'Logout' : undefined}
             >
-              <LogOut className="w-5 h-5 flex-shrink-0" />
+              <LogOut className="w-6 h-6 flex-shrink-0" />
               {!collapsed && <span>Logout</span>}
             </Link>
           </div>

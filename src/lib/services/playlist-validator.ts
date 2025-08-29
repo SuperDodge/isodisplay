@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { Playlist, PlaylistItem } from '@/types/playlist';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -220,13 +222,15 @@ class PlaylistValidator {
     return warnings;
   }
 
-  // Check if file exists (mock implementation)
+  // Check if file exists
   private async checkFileExists(filePath: string): Promise<boolean> {
-    // In a real implementation, this would check the actual file system
-    // or cloud storage service
     try {
-      // Mock check - always return true for now
-      // In production, use fs.existsSync or cloud storage API
+      // Check if file exists in the public uploads directory
+      // Construct the full path
+      const publicPath = path.join(process.cwd(), 'public', filePath);
+      
+      // Check if file exists
+      await fs.access(publicPath);
       return true;
     } catch {
       return false;

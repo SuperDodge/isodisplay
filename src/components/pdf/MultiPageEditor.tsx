@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Copy, Paste, RotateCw } from 'lucide-react';
 import { CropSettings } from './CropSelector';
+import { Input } from '@/components/ui/input';
 
 export interface PageSettings {
   pageNumber: number;
@@ -141,13 +142,13 @@ export function MultiPageEditor({
 
           <div className="flex items-center gap-2">
             <span className="text-white">Page</span>
-            <input
+            <Input
               type="number"
               min="1"
               max={totalPages}
               value={currentPage}
               onChange={(e) => goToPage(parseInt(e.target.value) || 1)}
-              className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-center"
+              className="w-16 text-center !h-8"
             />
             <span className="text-white">of {totalPages}</span>
           </div>
@@ -263,22 +264,22 @@ export function MultiPageEditor({
                   Clear
                 </button>
                 <div className="flex items-center gap-2">
-                  <input
+                  <Input
                     type="number"
                     min="1"
                     max={totalPages}
                     value={pageRange.start}
                     onChange={(e) => setPageRange({ ...pageRange, start: parseInt(e.target.value) || 1 })}
-                    className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm"
+                    className="w-16 text-center !h-8 text-sm"
                   />
                   <span className="text-white">to</span>
-                  <input
+                  <Input
                     type="number"
                     min="1"
                     max={totalPages}
                     value={pageRange.end}
                     onChange={(e) => setPageRange({ ...pageRange, end: parseInt(e.target.value) || totalPages })}
-                    className="w-16 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm"
+                    className="w-16 text-center !h-8 text-sm"
                   />
                   <button
                     onClick={selectPageRange}

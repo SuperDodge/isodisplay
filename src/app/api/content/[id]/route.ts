@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { databaseToApiContent } from '@/lib/transformers/api-transformers';
 import { validateUpdateContent, type UpdateContentInput } from '@/lib/validators/content-schemas';
 import { validationErrorResponse, ErrorResponses, isValidUUID } from '@/lib/validators/api-validators';
+import { promises as fs } from 'fs';
 
 
 // GET individual content item
@@ -131,13 +132,38 @@ export async function DELETE(
       return ErrorResponses.badRequest('Invalid content ID format');
     }
 
-    // Check if content exists
+    // Check if content exists and get thumbnails
     const existingContent = await prisma.content.findUnique({
       where: { id },
+      include: {
+        thumbnails: true,
+      },
     });
 
     if (!existingContent) {
       return NextResponse.json({ error: 'Content not found' }, { status: 404 });
+    }
+
+    // Delete thumbnail records and files
+    if (existingContent.thumbnails && existingContent.thumbnails.length > 0) {
+      for (const thumbnail of existingContent.thumbnails) {
+        // Try to delete the physical file if it's a local file
+        if (thumbnail.filePath && !thumbnail.filePath.startsWith('http')) {
+          try {
+            await fs.unlink(thumbnail.filePath);
+            console.log('Deleted thumbnail file:', thumbnail.filePath);
+          } catch (error) {
+            console.error('Failed to delete thumbnail file:', thumbnail.filePath, error);
+            // Continue even if file deletion fails (file might not exist)
+          }
+        }
+      }
+      
+      // Delete all thumbnail records from database
+      await prisma.fileThumbnail.deleteMany({
+        where: { contentId: id },
+      });
+      console.log(`Deleted ${existingContent.thumbnails.length} thumbnail records for content ${id}`);
     }
 
     // Soft delete the content

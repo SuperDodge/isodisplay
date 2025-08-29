@@ -17,6 +17,7 @@ export interface Display {
   createdBy: string;
   isActive: boolean;
   settings?: DisplaySettings;
+  clockSettings?: any; // JSON clock configuration
 }
 
 export type Resolution = '1920x1080' | '1080x1920' | '3840x2160' | '2160x3840' | 'custom';
@@ -43,6 +44,7 @@ export interface CreateDisplayInput {
   resolution?: Resolution;
   orientation?: Orientation;
   assignedPlaylistId?: string;
+  clockSettings?: any;
 }
 
 export interface UpdateDisplayInput {
@@ -51,6 +53,7 @@ export interface UpdateDisplayInput {
   resolution?: Resolution;
   orientation?: Orientation;
   assignedPlaylistId?: string | null;
+  clockSettings?: any;
 }
 
 export const RESOLUTION_OPTIONS = [

@@ -37,9 +37,9 @@ export function useCSRF() {
     return fetch(url, {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
         ...csrfHeaders,
+        'Content-Type': 'application/json',
+        ...options.headers, // Allow options to override default Content-Type if needed
       },
       credentials: 'same-origin',
     });

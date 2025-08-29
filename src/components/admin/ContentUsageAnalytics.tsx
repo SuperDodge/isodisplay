@@ -89,7 +89,7 @@ export default function ContentUsageAnalytics() {
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
+    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20 h-[600px] overflow-y-auto custom-scrollbar flex flex-col">
       <div className="flex items-center mb-6">
         <BarChart3 className="text-brand-orange-500 mr-3" size={24} />
         <h2 className="text-xl font-bold text-white">Content Usage Analytics</h2>
@@ -100,18 +100,6 @@ export default function ContentUsageAnalytics() {
           {error}
         </div>
       )}
-
-      {/* Summary Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-white">{stats?.totalFiles || 0}</div>
-          <div className="text-white/60 text-sm">Total Files</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-brand-orange-500">{stats?.totalSize || '0 MB'}</div>
-          <div className="text-white/60 text-sm">Storage Used</div>
-        </div>
-      </div>
 
       {/* Content Type Breakdown */}
       <div className="mb-6">
