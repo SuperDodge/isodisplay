@@ -53,6 +53,9 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
     imageSize: (content.metadata as any)?.imageSize || 100,
     pdfScale: (content.metadata as any)?.pdfScale || 'contain',
     pdfSize: (content.metadata as any)?.pdfSize || 100,
+    pdfAutoPaging: (content.metadata as any)?.pdfAutoPaging ?? true,
+    pdfPages: (content.metadata as any)?.pdfPages || '',
+    pdfPageDuration: (content.metadata as any)?.pdfPageDuration || 10,
     url: content.type?.toUpperCase() === ContentType.YOUTUBE ? (content.filePath || content.url || '') : (content.url || ''),
     textContent: (content.metadata as any)?.content || '',
     fontSize: (content.metadata as any)?.fontSize || '3rem',
@@ -89,7 +92,10 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
         updatePayload.metadata = {
           ...(content.metadata || {}),
           pdfScale: formData.pdfScale,
-          pdfSize: formData.pdfSize
+          pdfSize: formData.pdfSize,
+          pdfAutoPaging: !!formData.pdfAutoPaging,
+          pdfPages: (formData.pdfPages || '').trim(),
+          pdfPageDuration: Number(formData.pdfPageDuration) || 10,
         };
       } else if (contentType === ContentType.YOUTUBE) {
         // For YouTube, store URL in filePath and extract videoId for metadata
@@ -250,8 +256,7 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
 
           {/* Default Duration for other types */}
           {(content.type.toUpperCase() === ContentType.IMAGE || 
-            content.type.toUpperCase() === ContentType.TEXT || 
-            content.type.toUpperCase() === ContentType.PDF) && (
+            content.type.toUpperCase() === ContentType.TEXT) && (
             <div>
               <Label htmlFor="duration" className="text-white/70 text-sm">
                 Display Duration (seconds)
@@ -459,6 +464,58 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
                   </div>
                 </div>
               )}
+
+              {/* PDF Auto-Paging */}
+              <div className="mt-4">
+                <Label className="text-white/70 text-sm">Auto-paging</Label>
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, pdfAutoPaging: !formData.pdfAutoPaging })}
+                    className={`px-3 py-2 rounded-lg border transition ${
+                      formData.pdfAutoPaging
+                        ? 'bg-brand-orange-500 border-brand-orange-500 text-white'
+                        : 'bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {formData.pdfAutoPaging ? 'Enabled' : 'Disabled'}
+                  </button>
+                </div>
+                <p className="text-white/50 text-xs mt-1">
+                  Automatically advance through pages during playback
+                </p>
+              </div>
+
+              {/* PDF Pages Selection */}
+              <div className="mt-4">
+                <Label className="text-white/70 text-sm">Pages</Label>
+                <Input
+                  type="text"
+                  value={formData.pdfPages}
+                  onChange={(e) => setFormData({ ...formData, pdfPages: e.target.value })}
+                  placeholder="e.g., 1,3-5 (leave blank for all)"
+                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
+                />
+                <p className="text-white/50 text-xs mt-1">
+                  Select specific pages or ranges to display
+                </p>
+              </div>
+
+              {/* Seconds per page */}
+              <div className="mt-4">
+                <Label className="text-white/70 text-sm">Seconds per page</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={300}
+                  value={formData.pdfPageDuration}
+                  onChange={(e) => setFormData({ ...formData, pdfPageDuration: parseInt(e.target.value) || 10 })}
+                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/10 text-white focus:bg-white/10"
+                />
+                <p className="text-white/50 text-xs mt-1">
+                  Time to display each page when auto-paging is enabled
+                </p>
+              </div>
             </>
           )}
 
