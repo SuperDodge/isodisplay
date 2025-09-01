@@ -9,7 +9,8 @@ import { Document, Page, pdfjs } from 'react-pdf';
 // This resolves to a valid URL for the worker at runtime
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
+// Use CDN worker as a robust default in Next dev/prod without extra config
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 interface PDFRendererProps {
   item: PlaylistItem;
@@ -119,7 +120,12 @@ export function PDFRenderer({ item }: PDFRendererProps) {
       {!!pdfUrl && (
         <Document
           file={pdfUrl}
-          onLoadError={(e) => setError(e?.message || 'Failed to load PDF')}
+          onLoadError={(e) => {
+            const msg = (e as any)?.message || 'Failed to load PDF';
+            // eslint-disable-next-line no-console
+            console.error('PDF load error:', msg, 'URL:', pdfUrl);
+            setError(msg);
+          }}
           onLoadSuccess={(doc) => setNumPages(doc.numPages)}
           loading={
             <div className="absolute inset-0 flex items-center justify-center z-10">
