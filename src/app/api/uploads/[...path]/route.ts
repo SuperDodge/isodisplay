@@ -10,11 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    // Check if user is authenticated
+    // Auth is optional here to support public display viewing
     const user = await getCurrentUser();
-    if (!user) {
-      return new NextResponse('Unauthorized', { status: 401 });
-    }
 
     const { path: pathSegments } = await params;
     
@@ -97,13 +94,17 @@ export async function GET(
       return new NextResponse('Not Found', { status: 404 });
     }
 
-    // Check if user has permission to view this content
-    const hasPermission = user.permissions?.includes('CONTENT_VIEW') ||
-      user.permissions?.includes('USER_CONTROL') ||
-      contentOwnerId === user.id;
-
-    if (!hasPermission) {
-      return new NextResponse('Access denied', { status: 403 });
+    // If logged in, enforce permissions; otherwise allow for display viewers
+    if (user) {
+      const hasPermission = (
+        user.permissions?.includes('CONTENT_VIEW') ||
+        user.permissions?.includes('CONTENT_CREATE') ||
+        user.permissions?.includes('USER_CONTROL') ||
+        contentOwnerId === user.id
+      );
+      if (!hasPermission) {
+        return new NextResponse('Access denied', { status: 403 });
+      }
     }
 
     try {
