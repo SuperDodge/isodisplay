@@ -107,6 +107,6 @@ export const config = {
      * - public folder
      * - API routes that should be public
      */
-    '/((?!_next/static|_next/image|favicon.ico|fonts|uploads|api/files|public|api/health).*)',
+    '/((?!_next/static|_next/image|favicon.ico|fonts|uploads|public|api/health).*)',
   ],
 };
