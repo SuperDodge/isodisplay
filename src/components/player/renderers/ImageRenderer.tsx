@@ -109,6 +109,19 @@ export function ImageRenderer({ item, onError }: ImageRendererProps) {
   
   // Get image size from metadata (default 100%)
   const imageSize = item.content?.metadata?.imageSize || 100;
+  
+  // Calculate the actual dimensions for proper scaling
+  const scalingStyle = imageSize === 100 ? {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain' as const
+  } : {
+    width: 'auto',
+    height: 'auto',
+    maxWidth: `${imageSize}%`,
+    maxHeight: `${imageSize}%`,
+    objectFit: 'contain' as const
+  };
 
   // Show fallback content for persistent errors
   if (error && retryCount >= maxRetries && !loading) {
@@ -130,8 +143,10 @@ export function ImageRenderer({ item, onError }: ImageRendererProps) {
     isRetrying,
     backgroundColor,
     imageSize,
+    scalingStyle,
     contentMetadata: item.content?.metadata,
-    contentBgColor: item.content?.backgroundColor
+    contentBgColor: item.content?.backgroundColor,
+    fullItem: item
   });
 
   return (
@@ -167,15 +182,11 @@ export function ImageRenderer({ item, onError }: ImageRendererProps) {
         <img
           src={imageUrl}
           alt={item.title}
-          className="object-contain"
           onLoad={handleLoad}
           onError={handleImageError}
           style={{ 
             display: loading ? 'none' : 'block',
-            width: `${imageSize}%`,
-            height: `${imageSize}%`,
-            maxWidth: `${imageSize}%`,
-            maxHeight: `${imageSize}%`
+            ...scalingStyle
           }}
         />
       )}

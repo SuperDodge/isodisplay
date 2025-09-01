@@ -41,7 +41,8 @@ export function ContentGrid({ content, selectedItems, onSelectionChange, onEdit,
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
 
-  const formatFileSize = (bytes: bigint | undefined) => {
+  const formatFileSize = (bytes: bigint | undefined, type?: ContentType | string) => {
+    if (type === ContentType.YOUTUBE || type === 'youtube' || type === 'YOUTUBE') return 'YT';
     if (!bytes) return 'N/A';
     const size = Number(bytes);
     if (size < 1024) return `${size} B`;
@@ -106,6 +107,7 @@ export function ContentGrid({ content, selectedItems, onSelectionChange, onEdit,
                 backgroundColor={item.backgroundColor || '#000000'}
                 imageScale={item.metadata?.imageScale || 'contain'}
                 imageSize={item.metadata?.imageSize || 100}
+                metadata={item.metadata}
               />
 
               {/* Type Badge */}
@@ -169,12 +171,19 @@ export function ContentGrid({ content, selectedItems, onSelectionChange, onEdit,
                 {item.name}
               </h3>
               <div className="flex justify-between items-center text-sm text-white/50">
-                <span>{formatFileSize(item.fileSize)}</span>
+                <span>{formatFileSize(item.fileSize, item.type)}</span>
                 <span>{formatDate(item.createdAt)}</span>
               </div>
-              {item.metadata?.duration && (
+              {/* Show duration for all content types that have it */}
+              {(item.duration || item.metadata?.duration) && (
                 <div className="mt-2 text-sm text-white/50">
-                  Duration: {Math.floor(item.metadata.duration / 60)}:{String(item.metadata.duration % 60).padStart(2, '0')}
+                  Duration: {(() => {
+                    const duration = item.duration || item.metadata?.duration || 0;
+                    if (duration >= 60) {
+                      return `${Math.floor(duration / 60)}:${String(duration % 60).padStart(2, '0')}`;
+                    }
+                    return `${duration}s`;
+                  })()}
                 </div>
               )}
               {item.metadata?.pages && (

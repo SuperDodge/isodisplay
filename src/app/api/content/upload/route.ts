@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
     const imageSize = formData.get('imageSize') as string;
     const pdfScale = formData.get('pdfScale') as string;
     const pdfSize = formData.get('pdfSize') as string;
+    const duration = formData.get('duration') as string;
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -102,6 +103,7 @@ export async function POST(request: NextRequest) {
         imageSize: imageSize ? parseInt(imageSize) : undefined,
         pdfScale,
         pdfSize: pdfSize ? parseInt(pdfSize) : undefined,
+        duration: duration ? parseInt(duration) : undefined,
       }
     );
 

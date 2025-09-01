@@ -29,10 +29,25 @@ interface ContentEditModalProps {
 
 export function ContentEditModal({ content, onClose, onSuccess }: ContentEditModalProps) {
   const { secureFetch } = useCSRF();
+  // Get the actual YouTube video duration from metadata if available
+  const getYouTubeDuration = () => {
+    if (content.type?.toUpperCase() === ContentType.YOUTUBE) {
+      // Try to get actual video duration from metadata
+      if (content.metadata?.actualVideoDuration) {
+        return content.metadata.actualVideoDuration;
+      }
+      // Fallback to duration field if available
+      if (content.metadata?.duration) {
+        return content.metadata.duration;
+      }
+    }
+    return content.duration || 0;
+  };
+
   const [formData, setFormData] = useState({
     name: content.name,
     description: content.description || '',
-    duration: content.duration || 0,
+    duration: getYouTubeDuration(),
     backgroundColor: content.backgroundColor || '#000000',
     imageScale: (content.metadata as any)?.imageScale || 'contain',
     imageSize: (content.metadata as any)?.imageSize || 100,
@@ -57,7 +72,8 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
       const updatePayload: any = {
         name: formData.name,
         description: formData.description || null,
-        duration: formData.duration,
+        // Don't update duration for YouTube videos as it's determined by the video itself
+        duration: content.type.toUpperCase() === ContentType.YOUTUBE ? undefined : formData.duration,
       };
 
       // Add type-specific fields (check both uppercase and lowercase)
@@ -192,8 +208,30 @@ export function ContentEditModal({ content, onClose, onSuccess }: ContentEditMod
             />
           </div>
 
-          {/* Duration (for video content) */}
-          {(content.type.toUpperCase() === ContentType.VIDEO || content.type.toUpperCase() === ContentType.YOUTUBE) && (
+          {/* Duration for YouTube (non-editable) */}
+          {content.type.toUpperCase() === ContentType.YOUTUBE && (
+            <div>
+              <Label htmlFor="duration" className="text-white/70 text-sm">
+                Duration
+              </Label>
+              <div className="mt-1 px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg text-white/70">
+                {formData.duration > 0 ? (
+                  <>
+                    {Math.floor(formData.duration / 60)}:{String(formData.duration % 60).padStart(2, '0')} 
+                    <span className="text-white/50 ml-2">({formData.duration} seconds)</span>
+                  </>
+                ) : (
+                  <span className="text-white/50">Duration unavailable</span>
+                )}
+              </div>
+              <p className="text-white/50 text-xs mt-1">
+                YouTube video duration is automatically determined
+              </p>
+            </div>
+          )}
+
+          {/* Duration for local videos (editable) */}
+          {content.type.toUpperCase() === ContentType.VIDEO && (
             <div>
               <Label htmlFor="duration" className="text-white/70 text-sm">
                 Duration (seconds)

@@ -18,8 +18,10 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
   const [backgroundColor, setBackgroundColor] = useState<string>('#000000');
   const [imageScale, setImageScale] = useState<'contain' | 'cover' | 'fill'>('contain');
   const [imageSize, setImageSize] = useState<number>(100);
+  const [imageDuration, setImageDuration] = useState<number>(10); // Default 10 seconds for images
   const [pdfScale, setPdfScale] = useState<'contain' | 'cover' | 'fill'>('contain');
   const [pdfSize, setPdfSize] = useState<number>(100);
+  const [pdfDuration, setPdfDuration] = useState<number>(15); // Default 15 seconds for PDFs
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const acceptedTypes = [
@@ -78,18 +80,20 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
       formData.append('file', file);
       formData.append('title', file.name);
       
-      // Add background color and scale for image files
+      // Add background color, scale, and duration for image files
       if (file.type.startsWith('image/')) {
         formData.append('backgroundColor', backgroundColor);
         formData.append('imageScale', imageScale);
         formData.append('imageSize', imageSize.toString());
+        formData.append('duration', imageDuration.toString());
       }
       
-      // Add background color and scale for PDF files
+      // Add background color, scale, and duration for PDF files
       if (file.type === 'application/pdf') {
         formData.append('backgroundColor', backgroundColor);
         formData.append('pdfScale', pdfScale);
         formData.append('pdfSize', pdfSize.toString());
+        formData.append('duration', pdfDuration.toString());
       }
 
       try {
@@ -330,6 +334,23 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                   </div>
                 </div>
               )}
+
+              {/* Default Display Duration */}
+              <div className="space-y-2">
+                <label className="text-white text-sm">Default Display Duration (seconds)</label>
+                <input
+                  type="number"
+                  value={imageDuration}
+                  onChange={(e) => setImageDuration(Math.max(1, parseInt(e.target.value) || 1))}
+                  min="1"
+                  max="300"
+                  className="w-full px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg text-white placeholder-white/50 focus:bg-white/10 transition-all"
+                  placeholder="10"
+                />
+                <p className="text-white/50 text-xs">
+                  Default time to display this image in playlists (can be changed per playlist)
+                </p>
+              </div>
             </div>
           )}
 
@@ -429,6 +450,23 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
                   </div>
                 </div>
               )}
+
+              {/* Default Display Duration for PDFs */}
+              <div className="space-y-2">
+                <label className="text-white text-sm">Default Display Duration (seconds per page)</label>
+                <input
+                  type="number"
+                  value={pdfDuration}
+                  onChange={(e) => setPdfDuration(Math.max(1, parseInt(e.target.value) || 1))}
+                  min="1"
+                  max="300"
+                  className="w-full px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg text-white placeholder-white/50 focus:bg-white/10 transition-all"
+                  placeholder="15"
+                />
+                <p className="text-white/50 text-xs">
+                  Default time to display each PDF page in playlists (can be changed per playlist)
+                </p>
+              </div>
             </div>
           )}
 

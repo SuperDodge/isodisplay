@@ -174,7 +174,8 @@ export async function POST(request: NextRequest) {
         // Fetch full video info
         const videoInfo = await fetchYouTubeVideoInfoWithAPI(video.videoId);
         
-        // Create content entry with default 60 second duration for channel imports
+        // Create content entry with actual video duration
+        const actualDuration = videoInfo?.duration || 0;
         const content = await prisma.content.create({
           data: {
             name: videoInfo?.title || video.title,
@@ -186,13 +187,13 @@ export async function POST(request: NextRequest) {
               embedUrl: `https://www.youtube.com/embed/${video.videoId}`,
               thumbnailUrl: videoInfo?.thumbnailUrl || video.thumbnailUrl,
               source: 'youtube',
-              actualVideoDuration: videoInfo?.duration || 0,
-              customDuration: 60, // Default 60 seconds for channel imports
-              playFullVideo: false,
+              actualVideoDuration: actualDuration,
+              duration: actualDuration, // Store actual duration in metadata too
+              playFullVideo: true,
               importedFromChannel: true,
               channelHandle: CHANNEL_HANDLE,
             },
-            duration: 60, // Default 60 seconds for display in playlists
+            duration: actualDuration, // Store actual video duration
             mimeType: 'video/youtube',
             uploadedBy: user.id,
             createdBy: user.id,

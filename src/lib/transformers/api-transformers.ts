@@ -61,10 +61,19 @@ export function apiToFrontendPlaylistItem(apiItem: ApiPlaylistItemResponse): Pla
   let content: any = undefined;
   
   if (apiItem.content) {
+    // Format the file URL properly for serving through the API
+    let fileUrl = '';
+    if (apiItem.content.type === 'YOUTUBE') {
+      fileUrl = `https://www.youtube.com/watch?v=${apiItem.content.metadata?.videoId || ''}`;
+    } else if (apiItem.content.filePath) {
+      // Extract the relative path from the uploads directory
+      const parts = apiItem.content.filePath.split('/uploads/');
+      const relativePath = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+      fileUrl = `/api/uploads/${relativePath}`;
+    }
+    
     content = {
-      fileUrl: apiItem.content.type === 'YOUTUBE' 
-        ? `https://www.youtube.com/watch?v=${apiItem.content.metadata?.videoId || ''}` 
-        : apiItem.content.filePath,
+      fileUrl,
       backgroundColor: apiItem.content.backgroundColor,
       metadata: apiItem.content.metadata,
       text: apiItem.content.metadata?.text,
@@ -268,7 +277,7 @@ function transitionEffectToType(effect: TransitionEffect): string {
 /**
  * Convert database ContentType to frontend format
  */
-function contentTypeToFrontend(type?: ContentType | string): 'image' | 'video' | 'pdf' | 'youtube' | 'text' {
+function contentTypeToFrontend(type?: ContentType | string): 'image' | 'video' | 'pdf' | 'youtube' {
   if (!type) return 'image';
   
   const typeStr = (typeof type === 'string' ? type : type.toString()).toUpperCase();
@@ -280,8 +289,6 @@ function contentTypeToFrontend(type?: ContentType | string): 'image' | 'video' |
       return 'pdf';
     case 'YOUTUBE':
       return 'youtube';
-    case 'TEXT':
-      return 'text';
     case 'IMAGE':
     default:
       return 'image';

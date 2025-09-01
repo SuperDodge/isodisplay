@@ -8,7 +8,6 @@ import { ImageRenderer } from './renderers/ImageRenderer';
 import { VideoRenderer } from './renderers/VideoRenderer';
 import VerticalVideoRenderer from './renderers/VerticalVideoRenderer';
 import { PDFRenderer } from './renderers/PDFRenderer';
-import { TextRenderer } from './renderers/TextRenderer';
 import { YouTubeRenderer } from './renderers/YouTubeRenderer';
 import { useFullscreen } from '@/hooks/useFullscreen';
 import { useDisplayWebSocket } from '@/hooks/useWebSocket';
@@ -335,10 +334,12 @@ export function DisplayPlayer({ display, playlist: initialPlaylist }: DisplayPla
         return <PDFRenderer item={item} />;
       case 'youtube':
         return <YouTubeRenderer item={item} onEnded={moveToNextItem} />;
-      case 'text':
-        return <TextRenderer text={item.content?.text || ''} />;
       default:
-        return <TextRenderer text={`Unsupported content type: ${item.contentType}`} />;
+        return (
+          <div className="flex items-center justify-center h-full bg-black">
+            <div className="text-white text-2xl">Unsupported content type: {item.contentType}</div>
+          </div>
+        );
     }
   };
 

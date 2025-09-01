@@ -248,7 +248,6 @@ enum ContentType {
   PDF
   URL
   YOUTUBE
-  TEXT
 }
 
 enum TransitionType {

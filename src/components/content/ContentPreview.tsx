@@ -149,15 +149,6 @@ export function ContentPreview({ content, onClose, onBackgroundColorChange }: Co
           </div>
         );
 
-      case ContentType.TEXT:
-        return (
-          <div className="p-8 bg-white/5 h-full overflow-auto">
-            <pre className="text-white whitespace-pre-wrap">
-              {content.metadata?.content || 'No text content available'}
-            </pre>
-          </div>
-        );
-
       default:
         return (
           <div className="flex items-center justify-center h-full text-white/50">

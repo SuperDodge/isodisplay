@@ -157,34 +157,11 @@ export function ContentList({ content, selectedItems, onSelectionChange, onEdit,
                   </div>
                 </td>
                 <td className="p-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <p className="font-semibold">{item.name}</p>
-                      {item.mimeType && (
-                        <p className="text-xs text-white/50 mt-1">{item.mimeType}</p>
-                      )}
-                    </div>
-                    {/* Content Type Badge */}
-                    <div className={`px-2 py-0.5 rounded text-xs font-medium capitalize flex-shrink-0 ${
-                      item.type === ContentType.VIDEO
-                        ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                        : item.type === ContentType.YOUTUBE
-                          ? 'bg-red-500/20 text-red-300 border border-red-500/30'
-                          : item.type === ContentType.PDF
-                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                            : item.type === ContentType.URL
-                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                              : item.type === ContentType.TEXT
-                                ? 'bg-gray-500/20 text-gray-300 border border-gray-500/30'
-                                : 'bg-green-500/20 text-green-300 border border-green-500/30'
-                    }`}>
-                      {item.type === ContentType.YOUTUBE ? 'YouTube' : 
-                       item.type === ContentType.VIDEO ? 'Video' :
-                       item.type === ContentType.IMAGE ? 'Image' :
-                       item.type === ContentType.PDF ? 'PDF' :
-                       item.type === ContentType.URL ? 'URL' :
-                       item.type === ContentType.TEXT ? 'Text' : 'Unknown'}
-                    </div>
+                  <div>
+                    <p className="font-semibold">{item.name}</p>
+                    {item.mimeType && (
+                      <p className="text-xs text-white/50 mt-1">{item.mimeType}</p>
+                    )}
                   </div>
                 </td>
                 <td className="p-3 text-white/70">

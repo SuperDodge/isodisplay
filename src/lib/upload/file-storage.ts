@@ -132,6 +132,7 @@ export class FileStorageService {
           originalName: file.originalname,
           fileHash,
           backgroundColor: options.backgroundColor,
+          duration: options.duration, // Store default duration for images and PDFs
           metadata: (options.imageScale || options.imageSize || options.pdfScale || options.pdfSize) ? { 
             imageScale: options.imageScale,
             imageSize: options.imageSize,
@@ -408,11 +409,21 @@ export class FileStorageService {
       }
       
       // Update content with metadata and duration
+      // For videos, use the actual duration from metadata
+      // For images and PDFs, keep the user-specified duration
+      const existingContent = await prisma.content.findUnique({ 
+        where: { id: contentId },
+        select: { duration: true, type: true }
+      });
+      
       await prisma.content.update({
         where: { id: contentId },
         data: {
           metadata: metadata as any,
-          duration: metadata.duration ? Math.round(metadata.duration) : null,
+          // Only update duration for videos, keep existing for images/PDFs
+          duration: mimeType.startsWith('video/') 
+            ? (metadata.duration ? Math.round(metadata.duration) : null)
+            : existingContent?.duration,
           processingStatus: ProcessingStatus.COMPLETED,
         },
       });

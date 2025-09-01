@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { ContentType } from '@/generated/prisma';
-import { FileText, Film, Image as ImageIcon, Link, Youtube, Type } from 'lucide-react';
+import { FileText, Film, Image as ImageIcon, Link, Youtube } from 'lucide-react';
 
 interface ContentThumbnailProps {
   type: ContentType | string;  // Can be enum or string from transformer
@@ -12,9 +12,10 @@ interface ContentThumbnailProps {
   backgroundColor?: string;
   imageScale?: 'contain' | 'cover' | 'fill';
   imageSize?: number;
+  metadata?: any;
 }
 
-export function ContentThumbnail({ type, thumbnailUrl, name, backgroundColor = '#000000', imageScale = 'contain', imageSize = 100 }: ContentThumbnailProps) {
+export function ContentThumbnail({ type, thumbnailUrl, name, backgroundColor = '#000000', imageScale = 'contain', imageSize = 100, metadata }: ContentThumbnailProps) {
   const [imageError, setImageError] = useState(false);
 
   const getContentIcon = (type: ContentType | string) => {
@@ -35,9 +36,6 @@ export function ContentThumbnail({ type, thumbnailUrl, name, backgroundColor = '
       case 'YOUTUBE':
       case ContentType.YOUTUBE:
         return <Youtube className="w-8 h-8" />;
-      case 'TEXT':
-      case ContentType.TEXT:
-        return <Type className="w-8 h-8" />;
       default:
         return <FileText className="w-8 h-8" />;
     }

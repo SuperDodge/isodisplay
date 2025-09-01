@@ -8,9 +8,8 @@ import { ContentFilters } from '@/components/content/ContentFilters';
 import { ContentUpload } from '@/components/content/ContentUpload';
 import { ContentEditModal } from '@/components/content/ContentEditModal';
 import { YouTubeAddModal } from '@/components/content/YouTubeAddModal';
-import { TextContentModal } from '@/components/content/TextContentModal';
 import { Permission, ContentType } from '@/generated/prisma';
-import { Upload, Search, AlertTriangle, Youtube, Type, FileImage } from 'lucide-react';
+import { Upload, Search, AlertTriangle, Youtube, FileImage } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
   AlertDialog,
@@ -39,7 +38,6 @@ export default function ContentLibraryPage() {
   });
   const [showUpload, setShowUpload] = useState(false);
   const [showYouTubeAdd, setShowYouTubeAdd] = useState(false);
-  const [showTextAdd, setShowTextAdd] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [editingContent, setEditingContent] = useState<any>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -102,10 +100,6 @@ export default function ContentLibraryPage() {
     fetchContent();
   };
 
-  const handleTextSuccess = () => {
-    setShowTextAdd(false);
-    fetchContent();
-  };
 
   const handleEdit = (item: any) => {
     setEditingContent(item);
@@ -168,13 +162,6 @@ export default function ContentLibraryPage() {
               </div>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowTextAdd(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200"
-              >
-                <Type className="w-5 h-5" />
-                Add Text
-              </button>
               <button
                 onClick={() => setShowYouTubeAdd(true)}
                 className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition duration-200"
@@ -279,14 +266,6 @@ export default function ContentLibraryPage() {
         <YouTubeAddModal
           onClose={() => setShowYouTubeAdd(false)}
           onSuccess={handleYouTubeSuccess}
-        />
-      )}
-
-      {/* Text Content Modal */}
-      {showTextAdd && (
-        <TextContentModal
-          onClose={() => setShowTextAdd(false)}
-          onSuccess={handleTextSuccess}
         />
       )}
 

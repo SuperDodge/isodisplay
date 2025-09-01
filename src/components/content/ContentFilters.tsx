@@ -21,7 +21,6 @@ export function ContentFilters({ filters, onFiltersChange }: ContentFiltersProps
     { value: ContentType.PDF, label: 'PDFs' },
     { value: ContentType.URL, label: 'URLs' },
     { value: ContentType.YOUTUBE, label: 'YouTube' },
-    { value: ContentType.TEXT, label: 'Text' },
   ];
 
   const sortOptions = [
