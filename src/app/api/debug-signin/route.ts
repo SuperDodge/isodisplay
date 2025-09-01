@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
+  // Gate debug page behind env flag and disallow in production by default
+  const enabled = process.env.ENABLE_DEBUG_SIGNIN === 'true';
+  if (!enabled || process.env.NODE_ENV === 'production') {
+    return new NextResponse('Not Found', { status: 404 });
+  }
   const html = `
     <!DOCTYPE html>
     <html>

@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import { promises as fs } from 'fs';
@@ -11,7 +11,7 @@ import {
   processPdfFile as processPdfFileNode
 } from './pdf-processor-working';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 // Document processing options
 export interface DocumentProcessingOptions {
@@ -78,15 +78,10 @@ export async function convertPowerPointToPdf(
     const outputPath = path.join(tempDir, `${baseName}.pdf`);
     
     // Use LibreOffice in headless mode
-    const command = `soffice --headless --convert-to pdf --outdir "${tempDir}" "${inputPath}"`;
-    
     try {
-      const { stdout, stderr } = await execAsync(command, {
+      await execFileAsync('soffice', ['--headless', '--convert-to', 'pdf', '--outdir', tempDir, inputPath], {
         timeout,
-        env: {
-          ...process.env,
-          HOME: '/tmp', // LibreOffice needs a home directory
-        },
+        env: { ...process.env, HOME: '/tmp' },
       });
       
       // Check if the PDF was created
@@ -122,15 +117,10 @@ export async function convertDocument(
       filterOptions = `:${options.quality}`;
     }
     
-    const command = `soffice --headless --convert-to ${outputFormat}${filterOptions} --outdir "${tempDir}" "${inputPath}"`;
-    
     try {
-      await execAsync(command, {
+      await execFileAsync('soffice', ['--headless', '--convert-to', `${outputFormat}${filterOptions}`, '--outdir', tempDir, inputPath], {
         timeout,
-        env: {
-          ...process.env,
-          HOME: '/tmp',
-        },
+        env: { ...process.env, HOME: '/tmp' },
       });
       
       // Check if the output file was created
@@ -155,8 +145,7 @@ export async function extractTextFromPdf(
   
   try {
     // Use pdftotext command (part of poppler-utils)
-    const command = `pdftotext -l ${maxPages} "${pdfPath}" "${tempFile}"`;
-    await execAsync(command);
+    await execFileAsync('pdftotext', ['-l', String(maxPages), pdfPath, tempFile]);
     
     const text = await fs.readFile(tempFile, 'utf-8');
     await fs.unlink(tempFile).catch(() => {}); // Clean up temp file
@@ -238,7 +227,7 @@ export async function batchConvertDocuments(
 // Check if LibreOffice is available
 export async function checkLibreOfficeAvailable(): Promise<boolean> {
   try {
-    const { stdout } = await execAsync('soffice --version');
+    const { stdout } = await execFileAsync('soffice', ['--version']);
     return stdout.includes('LibreOffice');
   } catch {
     return false;
@@ -248,9 +237,9 @@ export async function checkLibreOfficeAvailable(): Promise<boolean> {
 // Check if PDF tools are available
 export async function checkPdfToolsAvailable(): Promise<boolean> {
   try {
-    await execAsync('which pdfinfo');
-    await execAsync('which pdftoppm');
-    await execAsync('which pdftotext');
+    await execFileAsync('which', ['pdfinfo']);
+    await execFileAsync('which', ['pdftoppm']);
+    await execFileAsync('which', ['pdftotext']);
     return true;
   } catch {
     return false;
@@ -268,17 +257,5 @@ export async function initializeDocumentProcessing(): Promise<void> {
   
   if (!pdfToolsAvailable) {
     console.warn('PDF tools (poppler-utils) are not available. PDF processing will be limited.');
-    
-    // Try to install poppler-utils if we have permission
-    if (process.platform === 'linux') {
-      try {
-        await execAsync('apk add --no-cache poppler-utils').catch(() =>
-          execAsync('apt-get update && apt-get install -y poppler-utils')
-        );
-        console.log('PDF tools installed successfully');
-      } catch (error) {
-        console.error('Failed to install PDF tools:', error);
-      }
-    }
   }
 }

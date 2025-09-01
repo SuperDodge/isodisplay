@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -7,7 +7,7 @@ import crypto from 'crypto';
 import { fileTypeFromBuffer, fileTypeFromFile } from 'file-type';
 import { ALLOWED_FILE_TYPES, FILE_SIZE_LIMITS } from './multer-config';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 // File validation result
 export interface FileValidationResult {
@@ -84,13 +84,10 @@ export async function scanFileForViruses(
   
   try {
     // Check if ClamAV is available
-    await execAsync('which clamscan');
+    await execFileAsync('which', ['clamscan']);
     
     // Run virus scan
-    const { stdout } = await execAsync(
-      `clamscan --no-summary "${filePath}"`,
-      { timeout }
-    );
+    const { stdout } = await execFileAsync('clamscan', ['--no-summary', filePath], { timeout });
     
     // Parse scan results
     if (stdout.includes('OK')) {
@@ -285,7 +282,7 @@ export async function batchValidateFiles(
 // Check if ClamAV is available
 export async function checkClamAvAvailable(): Promise<boolean> {
   try {
-    await execAsync('clamscan --version');
+    await execFileAsync('clamscan', ['--version']);
     return true;
   } catch {
     return false;
@@ -295,33 +292,16 @@ export async function checkClamAvAvailable(): Promise<boolean> {
 // Initialize virus scanner
 export async function initializeVirusScanner(): Promise<void> {
   const clamAvAvailable = await checkClamAvAvailable();
-  
   if (!clamAvAvailable) {
     console.warn('ClamAV is not available. Virus scanning will be skipped.');
-    
-    // Try to install ClamAV if we have permission
-    if (process.platform === 'linux') {
-      try {
-        await execAsync('apk add --no-cache clamav').catch(() =>
-          execAsync('apt-get update && apt-get install -y clamav clamav-daemon')
-        );
-        
-        // Update virus database
-        await execAsync('freshclam').catch(() => {});
-        
-        console.log('ClamAV installed successfully');
-      } catch (error) {
-        console.error('Failed to install ClamAV:', error);
-      }
-    }
-  } else {
-    // Update virus database
-    try {
-      await execAsync('freshclam');
-      console.log('ClamAV virus database updated');
-    } catch (error) {
-      console.warn('Failed to update ClamAV database:', error);
-    }
+    return;
+  }
+  // Attempt to update virus database, but ignore failures
+  try {
+    await execFileAsync('freshclam', []);
+    console.log('ClamAV virus database updated');
+  } catch {
+    console.warn('Failed to update ClamAV database');
   }
 }
 

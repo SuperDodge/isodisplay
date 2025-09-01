@@ -3,8 +3,11 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 import { securityMiddleware } from '@/lib/security/middleware';
 
+if (process.env.NODE_ENV === 'production' && !process.env.NEXTAUTH_SECRET) {
+  throw new Error('NEXTAUTH_SECRET must be set in production');
+}
 const secret = new TextEncoder().encode(
-  process.env.NEXTAUTH_SECRET || 'development-secret-minimum-32-characters-long'
+  process.env.NEXTAUTH_SECRET || (process.env.NODE_ENV !== 'production' ? 'development-secret-minimum-32-characters-long' : '')
 );
 
 // Define public routes that don't require authentication
@@ -37,11 +40,10 @@ export async function middleware(request: NextRequest) {
   console.log('🔍 Middleware - Cookies:', request.cookies.getAll().map(c => c.name));
 
   // Apply security middleware first (rate limiting, CSRF, etc.)
-  // TEMPORARILY DISABLED FOR TESTING - UNCOMMENT IN PRODUCTION
-  // const securityResponse = await securityMiddleware(request);
-  // if (securityResponse) {
-  //   return securityResponse;
-  // }
+  const securityResponse = await securityMiddleware(request);
+  if (securityResponse) {
+    return securityResponse;
+  }
 
   // Check if route is public
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));

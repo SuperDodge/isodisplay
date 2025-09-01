@@ -4,8 +4,11 @@ import * as bcrypt from 'bcryptjs';
 import { SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 
+if (process.env.NODE_ENV === 'production' && !process.env.NEXTAUTH_SECRET) {
+  throw new Error('NEXTAUTH_SECRET must be set in production');
+}
 const secret = new TextEncoder().encode(
-  process.env.NEXTAUTH_SECRET || 'development-secret-minimum-32-characters-long'
+  process.env.NEXTAUTH_SECRET || (process.env.NODE_ENV !== 'production' ? 'development-secret-minimum-32-characters-long' : '')
 );
 
 export async function POST(request: NextRequest) {

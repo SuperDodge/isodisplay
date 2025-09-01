@@ -3,8 +3,11 @@ import { jwtVerify } from 'jose';
 import { redirect } from 'next/navigation';
 import { Permission } from '@/generated/prisma';
 
+if (process.env.NODE_ENV === 'production' && !process.env.NEXTAUTH_SECRET) {
+  throw new Error('NEXTAUTH_SECRET must be set in production');
+}
 const secret = new TextEncoder().encode(
-  process.env.NEXTAUTH_SECRET || 'development-secret-minimum-32-characters-long'
+  process.env.NEXTAUTH_SECRET || (process.env.NODE_ENV !== 'production' ? 'development-secret-minimum-32-characters-long' : '')
 );
 
 export interface User {

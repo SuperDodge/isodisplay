@@ -2,6 +2,30 @@ const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
 const { Server } = require('socket.io');
+const { jwtVerify } = require('jose');
+
+// Minimal cookie parser
+function parseCookies(cookieHeader) {
+  const cookies = {};
+  if (!cookieHeader) return cookies;
+  cookieHeader.split(';').forEach((pair) => {
+    const idx = pair.indexOf('=');
+    if (idx > -1) {
+      const key = pair.slice(0, idx).trim();
+      const val = decodeURIComponent(pair.slice(idx + 1).trim());
+      cookies[key] = val;
+    }
+  });
+  return cookies;
+}
+
+function hasAdminPermission(user) {
+  if (!user || !Array.isArray(user.permissions)) return false;
+  return (
+    user.permissions.includes('USER_CONTROL') ||
+    user.permissions.includes('SYSTEM_SETTINGS')
+  );
+}
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
@@ -36,6 +60,42 @@ app.prepare().then(() => {
   // Make io instance globally available for API routes
   global.io = io;
 
+  // Enforce NEXTAUTH_SECRET in production
+  if (!dev && !process.env.NEXTAUTH_SECRET) {
+    console.error('❌ NEXTAUTH_SECRET is required in production. Set the environment variable.');
+    process.exit(1);
+  }
+
+  const jwtSecret = new TextEncoder().encode(
+    process.env.NEXTAUTH_SECRET || 'development-secret-minimum-32-characters-long'
+  );
+
+  // Attach user info to socket if session-token cookie is present
+  io.use(async (socket, next) => {
+    try {
+      const cookieHeader = socket.request.headers.cookie || '';
+      const cookies = parseCookies(cookieHeader);
+      const token = cookies['session-token'];
+      if (token) {
+        try {
+          const { payload } = await jwtVerify(token, jwtSecret);
+          socket.data.user = {
+            id: payload.id,
+            email: payload.email,
+            username: payload.username,
+            permissions: payload.permissions || [],
+          };
+        } catch (e) {
+          // Invalid token; continue as unauthenticated
+          socket.data.user = null;
+        }
+      }
+      return next();
+    } catch (err) {
+      return next();
+    }
+  });
+
   // WebSocket connection handling
   io.on('connection', (socket) => {
     console.log('🔌 New WebSocket connection:', socket.id);
@@ -45,13 +105,26 @@ app.prepare().then(() => {
       try {
         const { displayId, displayUrl } = data;
         console.log('📺 Display registering:', displayId, displayUrl);
-        
-        // TODO: Verify display exists and URL matches
-        // const display = await displayService.getByUniqueUrl(displayUrl);
-        // if (!display || display.id !== displayId) {
-        //   socket.emit('error', { message: 'Invalid display credentials' });
-        //   return;
-        // }
+
+        // Verify display exists and URL matches using Prisma Client JS
+        try {
+          const { PrismaClient } = require('./src/generated/prisma');
+          const prisma = new PrismaClient();
+          const display = await prisma.display.findUnique({
+            where: { urlSlug: displayUrl },
+            select: { id: true },
+          });
+          await prisma.$disconnect();
+          if (!display || display.id !== displayId) {
+            socket.emit('error', { message: 'Invalid display credentials' });
+            return;
+          }
+        } catch (dbErr) {
+          console.error('Display verification error:', dbErr);
+          // If DB is unavailable, fail closed for registration
+          socket.emit('error', { message: 'Registration failed' });
+          return;
+        }
 
         displayConnections.set(displayId, socket.id);
         socket.join(`display:${displayId}`);
@@ -79,6 +152,11 @@ app.prepare().then(() => {
 
     // Handle admin client registration
     socket.on('register_admin', () => {
+      const user = socket.data.user;
+      if (!hasAdminPermission(user)) {
+        socket.emit('error', { message: 'Unauthorized' });
+        return;
+      }
       adminConnections.add(socket.id);
       socket.join('admins');
       console.log('👨‍💼 Admin registered with socket:', socket.id);
@@ -102,6 +180,11 @@ app.prepare().then(() => {
 
     // Handle playlist updates from admin
     socket.on('playlist_update', async (data) => {
+      const user = socket.data.user;
+      if (!hasAdminPermission(user)) {
+        socket.emit('error', { message: 'Unauthorized' });
+        return;
+      }
       try {
         const { playlistId, displayIds } = data;
         console.log('📋 Playlist update:', playlistId, 'for displays:', displayIds);
@@ -138,6 +221,11 @@ app.prepare().then(() => {
 
     // Handle display control commands from admin
     socket.on('display_control', (data) => {
+      const user = socket.data.user;
+      if (!hasAdminPermission(user)) {
+        socket.emit('error', { message: 'Unauthorized' });
+        return;
+      }
       const message = {
         type: 'display_control',
         data,
@@ -154,6 +242,11 @@ app.prepare().then(() => {
 
     // Handle emergency stop
     socket.on('emergency_stop', (data) => {
+      const user = socket.data.user;
+      if (!hasAdminPermission(user)) {
+        socket.emit('error', { message: 'Unauthorized' });
+        return;
+      }
       const message = {
         type: 'emergency_stop',
         data,

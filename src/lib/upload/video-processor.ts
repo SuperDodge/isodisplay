@@ -48,11 +48,22 @@ export function getVideoMetadata(videoPath: string): Promise<VideoMetadata> {
         return;
       }
 
+      const parseFps = (s?: string): number => {
+        if (!s) return 0;
+        if (s.includes('/')) {
+          const [n, d] = s.split('/').map((v) => Number(v));
+          if (!isFinite(n) || !isFinite(d) || d === 0) return 0;
+          return n / d;
+        }
+        const n = Number(s);
+        return isFinite(n) ? n : 0;
+      };
+
       resolve({
         duration: metadata.format.duration,
         width: videoStream.width,
         height: videoStream.height,
-        fps: eval(videoStream.r_frame_rate || '0'),
+        fps: parseFps(videoStream.r_frame_rate),
         codec: videoStream.codec_name,
         bitrate: metadata.format.bit_rate ? parseInt(metadata.format.bit_rate) : undefined,
         size: metadata.format.size ? parseInt(metadata.format.size) : undefined,
