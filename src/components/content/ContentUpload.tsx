@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { Upload, X, File, AlertCircle } from 'lucide-react';
 import { useCSRF } from '@/hooks/useCSRF';
+import { getCSRFHeaders } from '@/lib/security/csrf';
 
 interface ContentUploadProps {
   onClose: () => void;
@@ -10,7 +11,7 @@ interface ContentUploadProps {
 }
 
 export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
-  const { secureFetch } = useCSRF();
+  const { csrfToken } = useCSRF();
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
@@ -75,6 +76,23 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
     const uploadErrors: string[] = [];
     let successCount = 0;
 
+    // Ensure CSRF token meta is present (fetch if missing)
+    try {
+      const meta = document.querySelector('meta[name="csrf-token"]');
+      if (!meta) {
+        const res = await fetch('/api/auth/csrf');
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.csrfToken) {
+            const m = document.createElement('meta');
+            m.name = 'csrf-token';
+            m.content = data.csrfToken;
+            document.head.appendChild(m);
+          }
+        }
+      }
+    } catch {}
+
     for (const file of files) {
       const formData = new FormData();
       formData.append('file', file);
@@ -124,6 +142,13 @@ export function ContentUpload({ onClose, onSuccess }: ContentUploadProps) {
         });
 
         xhr.open('POST', '/api/content/upload');
+        xhr.withCredentials = true;
+        // Include CSRF token for security middleware
+        const headers = getCSRFHeaders();
+        const token = headers['x-csrf-token'] || csrfToken || '';
+        if (token) {
+          xhr.setRequestHeader('x-csrf-token', token);
+        }
         xhr.send(formData);
 
         await uploadPromise;

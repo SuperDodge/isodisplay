@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, hasPermission } from '@/lib/auth-helpers';
-import { uploadConfigs } from '@/lib/upload/multer-config';
+// import { uploadConfigs } from '@/lib/upload/multer-config';
 import { getFileStorageService } from '@/lib/upload/file-storage';
 import { validateFile } from '@/lib/upload/file-validator';
 import { uploadQueue } from '@/lib/upload/upload-queue';
+import path from 'path';
 
 // Handle file upload
 export async function POST(request: NextRequest) {
@@ -151,4 +152,4 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-const path = await import('path');
+// path imported at top
