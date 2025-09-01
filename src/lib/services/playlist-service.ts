@@ -160,16 +160,6 @@ class PlaylistService {
 
   // Update playlist
   async updatePlaylist(playlistId: string, userId: string, input: UpdatePlaylistInput) {
-    // Check ownership
-    const existing = await prisma.playlist.findFirst({
-      where: {
-        id: playlistId,
-        createdBy: userId,
-      },
-    });
-
-    if (!existing) return null;
-
     const playlist = await prisma.$transaction(async (tx) => {
       // Update playlist metadata
       await tx.playlist.update({

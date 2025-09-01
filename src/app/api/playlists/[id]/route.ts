@@ -120,15 +120,25 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       actualUserId = userByEmail.id;
     }
 
+    // Authorization: allow if owner or has admin-level perms
+    const existingPlaylist = await playlistService.getPlaylist(id);
+    if (!existingPlaylist) {
+      return NextResponse.json({ error: 'Playlist not found' }, { status: 404 });
+    }
+
+    const perms = (user.permissions as string[]) || [];
+    const isOwner = existingPlaylist.createdBy === actualUserId;
+    const isAdmin = perms.includes('USER_CONTROL') || perms.includes('SYSTEM_SETTINGS') || perms.includes('PLAYLIST_CREATE');
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
     const playlist = await playlistService.updatePlaylist(id, actualUserId, {
       name: validatedData.name,
       items: validatedData.items,
       isActive: validatedData.isActive,
     });
 
-    if (!playlist) {
-      return NextResponse.json({ error: 'Playlist not found' }, { status: 404 });
-    }
 
     // Transform database response to API format
     const apiResponse = databaseToApiPlaylist(playlist);
