@@ -58,7 +58,11 @@ class PlaylistService {
         include: {
           items: {
             include: {
-              content: true,
+              content: {
+                include: {
+                  thumbnails: true,
+                },
+              },
             },
             orderBy: {
               order: 'asc',
@@ -85,7 +89,11 @@ class PlaylistService {
       include: {
         items: {
           include: {
-            content: true,
+            content: {
+              include: {
+                thumbnails: true,
+              },
+            },
           },
           orderBy: {
             order: 'asc',
@@ -123,7 +131,11 @@ class PlaylistService {
       include: {
         items: {
           include: {
-            content: true,
+            content: {
+              include: {
+                thumbnails: true,
+              },
+            },
           },
           orderBy: {
             order: 'asc',
@@ -197,7 +209,11 @@ class PlaylistService {
         include: {
           items: {
             include: {
-              content: true,
+              content: {
+                include: {
+                  thumbnails: true,
+                },
+              },
             },
             orderBy: {
               order: 'asc',
