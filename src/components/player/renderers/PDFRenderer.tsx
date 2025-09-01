@@ -9,7 +9,7 @@ import { Document, Page, pdfjs } from 'react-pdf';
 // This resolves to a valid URL for the worker at runtime
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
 
 interface PDFRendererProps {
   item: PlaylistItem;
@@ -19,6 +19,8 @@ export function PDFRenderer({ item }: PDFRendererProps) {
   const [error, setError] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState<{ width: number; height: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [numPages, setNumPages] = useState<number>(0);
+  const [pageIndex, setPageIndex] = useState<number>(0);
 
   // Get the PDF URL from content object or fallback to API endpoint
   const pdfUrl = item.content?.fileUrl || `/api/content/${item.contentId}/file`;
@@ -41,15 +43,68 @@ export function PDFRenderer({ item }: PDFRendererProps) {
     return () => window.removeEventListener('resize', measure);
   }, [measure]);
 
-  // Compute scale to fit page into container while preserving aspect ratio
+  // Read PDF display preferences from metadata
+  const meta = item.content?.metadata || {};
+  const pdfScale: 'contain' | 'cover' | 'fill' = (meta.pdfScale as any) || 'contain';
+  const pdfSize: number = typeof meta.pdfSize === 'number' ? meta.pdfSize : 100;
+  const autoPaging: boolean = meta.pdfAutoPaging !== undefined ? !!meta.pdfAutoPaging : true;
+  const pagesSpec: string | undefined = typeof meta.pdfPages === 'string' ? meta.pdfPages : undefined;
+  const perPageDuration: number = typeof meta.pdfPageDuration === 'number'
+    ? meta.pdfPageDuration
+    : (item.duration || 10);
+
+  // Parse pages spec like "1,3-5"
+  const parsePages = useCallback((spec: string | undefined, total: number): number[] => {
+    if (!total) return [1];
+    if (!spec || !spec.trim()) return Array.from({ length: total }, (_, i) => i + 1);
+    const result: number[] = [];
+    for (const part of spec.split(',')) {
+      const p = part.trim();
+      if (!p) continue;
+      if (p.includes('-')) {
+        const [aStr, bStr] = p.split('-');
+        let a = parseInt(aStr, 10); let b = parseInt(bStr, 10);
+        if (!Number.isFinite(a) || !Number.isFinite(b)) continue;
+        if (a < 1) a = 1; if (b > total) b = total;
+        if (a > b) [a, b] = [b, a];
+        for (let i = a; i <= b; i++) result.push(i);
+      } else {
+        let n = parseInt(p, 10);
+        if (Number.isFinite(n)) {
+          if (n < 1) n = 1; if (n > total) n = total;
+          result.push(n);
+        }
+      }
+    }
+    return result.length ? Array.from(new Set(result)) : [1];
+  }, []);
+
+  const pages = parsePages(pagesSpec, numPages);
+  const pageNumber = pages[Math.min(pageIndex, Math.max(0, pages.length - 1))] || 1;
+
+  // Compute scale to fit/cover page into container while preserving aspect ratio
   const computeScale = () => {
     if (!pageSize) return 1;
     const { width: cw, height: ch } = dimensions;
     if (!cw || !ch) return 1;
     const sx = cw / pageSize.width;
     const sy = ch / pageSize.height;
-    return Math.min(sx, sy);
+    let base = pdfScale === 'cover' || pdfScale === 'fill' ? Math.max(sx, sy) : Math.min(sx, sy);
+    if (pdfScale === 'contain' && pdfSize && pdfSize > 0 && pdfSize <= 100) {
+      base = base * (pdfSize / 100);
+    }
+    return base;
   };
+
+  // Auto-paging timer
+  useEffect(() => {
+    if (!autoPaging || pages.length <= 1) return;
+    const ms = Math.max(0.5, perPageDuration) * 1000;
+    const t = setInterval(() => {
+      setPageIndex((i) => (i + 1) % pages.length);
+    }, ms);
+    return () => clearInterval(t);
+  }, [autoPaging, perPageDuration, pages.length]);
 
   return (
     <div ref={containerRef} className="w-full h-full relative overflow-hidden" style={{ backgroundColor }}>
@@ -65,6 +120,7 @@ export function PDFRenderer({ item }: PDFRendererProps) {
         <Document
           file={pdfUrl}
           onLoadError={(e) => setError(e?.message || 'Failed to load PDF')}
+          onLoadSuccess={(doc) => setNumPages(doc.numPages)}
           loading={
             <div className="absolute inset-0 flex items-center justify-center z-10">
               <div className="text-center text-white">
@@ -76,7 +132,7 @@ export function PDFRenderer({ item }: PDFRendererProps) {
           className="w-full h-full"
         >
           <Page
-            pageNumber={1}
+            pageNumber={pageNumber}
             renderTextLayer={false}
             renderAnnotationLayer={false}
             onLoadSuccess={(page) => {
