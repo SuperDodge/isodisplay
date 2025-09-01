@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, rateLimitConfigs } from './rate-limit';
 import { validateCSRFToken } from './csrf-server';
 
-export async function securityMiddleware(request: NextRequest): Promise<NextResponse | null> {
+export async function securityMiddleware(request: NextRequest): Promise<NextResponse | void> {
   const { pathname } = request.nextUrl;
   
   // Determine rate limit config based on path
@@ -46,13 +46,8 @@ export async function securityMiddleware(request: NextRequest): Promise<NextResp
     }
   }
   
-  // Add security headers to the response
-  const response = NextResponse.next();
-  Object.entries(rateLimitHeaders).forEach(([key, value]) => {
-    if (value) response.headers.set(key, value);
-  });
-  
-  return null; // Continue to the next middleware
+  // For allowed requests, continue to next middleware/handler
+  return; // undefined means continue
 }
 
 // Input validation helper

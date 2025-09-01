@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, hasPermission } from '@/lib/auth-helpers';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
-import fs from 'fs/promises';
-import path from 'path';
 import os from 'os';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,49 +41,38 @@ export async function POST(request: NextRequest) {
     const backupFileName = `isodisplay-backup-${timestamp}.sql`;
     const backupPath = path.join(os.tmpdir(), backupFileName);
 
-    // Construct pg_dump command
-    let pgDumpCommand: string;
-    
-    if (databaseUrl.startsWith('prisma+postgres://')) {
-      // For Prisma Postgres development database
-      pgDumpCommand = `PGPASSWORD=postgres pg_dump -h localhost -p 51214 -U postgres -d template1 --no-owner --no-acl > "${backupPath}"`;
-    } else {
-      // For regular PostgreSQL database
-      const host = connectionUrl.hostname || 'localhost';
-      const port = connectionUrl.port || '5432';
-      const username = connectionUrl.username || 'postgres';
-      const password = connectionUrl.password || '';
-      const database = connectionUrl.pathname.slice(1) || 'isodisplay';
-
-      pgDumpCommand = `PGPASSWORD=${password} pg_dump -h ${host} -p ${port} -U ${username} -d ${database} --no-owner --no-acl > "${backupPath}"`;
-    }
-
     try {
-      // Execute pg_dump
-      await execAsync(pgDumpCommand);
-      
-      // Read the backup file
-      const backupData = await fs.readFile(backupPath);
-      
-      // Clean up temp file
-      await fs.unlink(backupPath).catch(() => {}); // Ignore errors if file doesn't exist
-      
-      // Return the backup as a downloadable file
-      return new NextResponse(backupData, {
+      let stdout: Buffer | string = '';
+      if (databaseUrl.startsWith('prisma+postgres://')) {
+        const env = { ...process.env, PGPASSWORD: 'postgres' };
+        const args = ['-h', 'localhost', '-p', '51214', '-U', 'postgres', '-d', 'template1', '--no-owner', '--no-acl'];
+        const res = await execFileAsync('pg_dump', args, { env });
+        stdout = res.stdout;
+      } else {
+        const host = connectionUrl.hostname || 'localhost';
+        const port = connectionUrl.port || '5432';
+        const username = decodeURIComponent(connectionUrl.username || 'postgres');
+        const password = decodeURIComponent(connectionUrl.password || '');
+        const database = decodeURIComponent(connectionUrl.pathname.slice(1) || 'isodisplay');
+        const env = { ...process.env, PGPASSWORD: password };
+        const args = ['-h', host, '-p', port || '5432', '-U', username, '-d', database, '--no-owner', '--no-acl'];
+        const res = await execFileAsync('pg_dump', args, { env });
+        stdout = res.stdout;
+      }
+
+      const dataBuffer = Buffer.isBuffer(stdout) ? stdout : Buffer.from(stdout);
+      return new NextResponse(dataBuffer, {
         status: 200,
         headers: {
           'Content-Type': 'application/sql',
           'Content-Disposition': `attachment; filename="${backupFileName}"`,
+          'X-Content-Type-Options': 'nosniff',
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Database backup error:', error);
-      
-      // Clean up temp file if it exists
-      await fs.unlink(backupPath).catch(() => {});
-      
       // Check if pg_dump is available
-      if (error.message?.includes('pg_dump: command not found') || error.message?.includes('not found')) {
+      if (error?.message?.includes('pg_dump') && error?.message?.includes('not found')) {
         return NextResponse.json(
           { error: 'PostgreSQL client tools not installed. Please install postgresql-client.' },
           { status: 500 }

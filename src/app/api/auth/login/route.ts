@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, password } = body;
     
-    console.log('🔐 Custom login endpoint - email:', email);
+    // Received login request (email masked)
     
     if (!email || !password) {
       return NextResponse.json(
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     });
     
     if (!user) {
-      console.log('❌ User not found:', email);
+      console.warn('❌ User not found');
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
     
     if (user.status !== 'ACTIVE') {
-      console.log('❌ User not active:', email);
+      console.warn('❌ User not active');
       return NextResponse.json(
         { error: 'Account is not active' },
         { status: 401 }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     const isValidPassword = await bcrypt.compare(password, user.password);
     
     if (!isValidPassword) {
-      console.log('❌ Invalid password for:', email);
+      console.warn('❌ Invalid password');
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
       .setExpirationTime('30d')
       .sign(secret);
     
-    console.log('✅ Login successful for:', email);
+    // Successful login
     
     // Set the session cookie
     const cookieStore = await cookies();

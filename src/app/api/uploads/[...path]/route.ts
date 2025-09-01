@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { getCurrentUser } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
+import { env as appEnv } from '@/lib/env';
 
 export async function GET(
   request: NextRequest,
@@ -21,9 +22,25 @@ export async function GET(
       return new NextResponse('Not Found', { status: 404 });
     }
 
-    // Get the uploads directory path
-    // Use the hardcoded path for now since env variable isn't loading correctly in App Router
-    const uploadsBasePath = '/Users/sronnie/Documents/Coding/IsoDisplay/uploads';
+    // Resolve uploads directory path
+    const uploadsBasePath = (() => {
+      try {
+        // Prefer validated env FILE_STORAGE_PATH
+        if (appEnv.FILE_STORAGE_PATH) {
+          return path.isAbsolute(appEnv.FILE_STORAGE_PATH)
+            ? appEnv.FILE_STORAGE_PATH
+            : path.join(process.cwd(), appEnv.FILE_STORAGE_PATH);
+        }
+      } catch {}
+      // Fallbacks
+      const fallback = process.env.FILE_STORAGE_PATH;
+      if (fallback) {
+        return path.isAbsolute(fallback)
+          ? fallback
+          : path.join(process.cwd(), fallback);
+      }
+      return path.join(process.cwd(), 'uploads');
+    })();
     
     // Reconstruct the file path
     const filePath = path.join(uploadsBasePath, ...pathSegments);
@@ -36,26 +53,57 @@ export async function GET(
       return new NextResponse('Forbidden', { status: 403 });
     }
 
-    // Check if this is a content file and validate access permissions
+    // Always require that the requested file maps to a known Content or Thumbnail record
+    // Build relative path (portion after /uploads/)
     const filePathStr = pathSegments.join('/');
+    let contentOwnerId: string | null = null;
+
+    // Look up by Content.filePath
     const content = await prisma.content.findFirst({
       where: {
+        deletedAt: null,
         OR: [
           { filePath: { contains: filePathStr } },
-          { filePath: { endsWith: filePathStr } }
-        ]
-      }
+          { filePath: { endsWith: filePathStr } },
+        ],
+      },
+      select: { id: true, uploadedBy: true },
     });
 
     if (content) {
-      // Check if user has permission to view this content
-      const hasPermission = user.permissions?.includes('CONTENT_VIEW') || 
-                          user.permissions?.includes('USER_CONTROL') ||
-                          content.uploadedBy === user.id;
-      
-      if (!hasPermission) {
-        return new NextResponse('Access denied', { status: 403 });
+      contentOwnerId = content.uploadedBy;
+    } else {
+      // Try FileThumbnail.filePath match, then fetch owning content
+      const thumb = await prisma.fileThumbnail.findFirst({
+        where: {
+          OR: [
+            { filePath: { contains: filePathStr } },
+            { filePath: { endsWith: filePathStr } },
+          ],
+        },
+        select: { contentId: true },
+      });
+      if (thumb) {
+        const owning = await prisma.content.findUnique({
+          where: { id: thumb.contentId },
+          select: { uploadedBy: true },
+        });
+        contentOwnerId = owning?.uploadedBy || null;
       }
+    }
+
+    if (!contentOwnerId) {
+      // Hide existence of unknown files
+      return new NextResponse('Not Found', { status: 404 });
+    }
+
+    // Check if user has permission to view this content
+    const hasPermission = user.permissions?.includes('CONTENT_VIEW') ||
+      user.permissions?.includes('USER_CONTROL') ||
+      contentOwnerId === user.id;
+
+    if (!hasPermission) {
+      return new NextResponse('Access denied', { status: 403 });
     }
 
     try {
@@ -67,56 +115,31 @@ export async function GET(
       
       // Determine content type based on file extension
       const ext = path.extname(resolvedPath).toLowerCase();
-      let contentType = 'application/octet-stream';
-      
-      switch (ext) {
-        case '.jpg':
-        case '.jpeg':
-          contentType = 'image/jpeg';
-          break;
-        case '.png':
-          contentType = 'image/png';
-          break;
-        case '.gif':
-          contentType = 'image/gif';
-          break;
-        case '.webp':
-          contentType = 'image/webp';
-          break;
-        case '.svg':
-          contentType = 'image/svg+xml';
-          break;
-        case '.mp4':
-          contentType = 'video/mp4';
-          break;
-        case '.webm':
-          contentType = 'video/webm';
-          break;
-        case '.pdf':
-          contentType = 'application/pdf';
-          break;
-        case '.txt':
-          contentType = 'text/plain';
-          break;
-        case '.html':
-          contentType = 'text/html';
-          break;
-        case '.css':
-          contentType = 'text/css';
-          break;
-        case '.js':
-          contentType = 'application/javascript';
-          break;
-        case '.json':
-          contentType = 'application/json';
-          break;
-      }
+      const mediaTypes: Record<string, string> = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.avif': 'image/avif',
+        '.svg': 'image/svg+xml',
+        '.mp4': 'video/mp4',
+        '.webm': 'video/webm',
+        '.pdf': 'application/pdf',
+      };
+      const contentType = mediaTypes[ext] || 'application/octet-stream';
+      const inlineTypes = new Set(Object.values(mediaTypes));
+      const disposition = inlineTypes.has(contentType)
+        ? 'inline'
+        : `attachment; filename="${path.basename(resolvedPath)}"`;
       
       // Return the file with appropriate headers
       return new NextResponse(fileBuffer, {
         status: 200,
         headers: {
           'Content-Type': contentType,
+          'X-Content-Type-Options': 'nosniff',
+          'Content-Disposition': disposition,
           'Cache-Control': 'public, max-age=31536000, immutable',
           'Content-Length': fileBuffer.length.toString(),
         },

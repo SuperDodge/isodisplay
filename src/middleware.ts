@@ -36,14 +36,11 @@ const protectedRoutes = {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  console.log('🔍 Middleware - Path:', pathname);
-  console.log('🔍 Middleware - Cookies:', request.cookies.getAll().map(c => c.name));
+  // Minimal diagnostics; avoid logging sensitive data
 
   // Apply security middleware first (rate limiting, CSRF, etc.)
   const securityResponse = await securityMiddleware(request);
-  if (securityResponse) {
-    return securityResponse;
-  }
+  if (securityResponse instanceof NextResponse) return securityResponse;
 
   // Check if route is public
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
