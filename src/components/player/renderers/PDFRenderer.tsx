@@ -10,7 +10,8 @@ import { Document, Page, pdfjs } from 'react-pdf';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 // Use CDN worker as a robust default in Next dev/prod without extra config
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Prefer local worker served from API to avoid external dependency
+pdfjs.GlobalWorkerOptions.workerSrc = '/api/pdfjs/worker.js';
 
 interface PDFRendererProps {
   item: PlaylistItem;
