@@ -7,10 +7,14 @@
     "build": "next build",
     "start": "NODE_ENV=production node server.js",
     "lint": "eslint",
+    "type-check": "tsc --noEmit",
+    "test": "echo 'No tests configured yet'",
     "prepare": "husky",
     "regenerate-thumbnails": "tsx scripts/regenerate-display-thumbnails.ts",
     "db:seed": "tsx prisma/seed.ts",
-    "db:reset": "npx prisma migrate reset --force"
+    "db:reset": "npx prisma migrate reset --force",
+    "db:migrate": "prisma migrate deploy",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",

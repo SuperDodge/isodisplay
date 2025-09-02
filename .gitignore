@@ -41,3 +41,31 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# Local development files
+.pgdata/
+uploads/
+.next-dev.log
+.next-dev.pid
+*.db
+*.sqlite
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-*
+
+# OS files
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Test files
+*.test.js.snap
+coverage/
+
+# Production builds
+dist/
+build/

@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: isodisplay-db
@@ -9,7 +8,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-isodisplay}
       POSTGRES_USER: ${POSTGRES_USER:-isodisplay}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -22,63 +21,33 @@ services:
       timeout: 5s
       retries: 5
 
-  # Next.js Application
-  nextjs:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: isodisplay-app
     restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-isodisplay}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-isodisplay}?schema=public
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-changeme}
-      FILE_STORAGE_PATH: /app/uploads
-    volumes:
-      - uploads_data:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
-    networks:
-      - isodisplay-network
-    expose:
-      - "3000"
-
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: isodisplay-proxy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-isodisplay}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-isodisplay}?schema=public
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NODE_ENV: production
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - nginx_cache:/var/cache/nginx
-    depends_on:
-      - nextjs
+      - uploads_data:/app/uploads
+    ports:
+      - "3000:3000"
     networks:
       - isodisplay-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-networks:
-  isodisplay-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
 
 volumes:
   postgres_data:
     driver: local
   uploads_data:
     driver: local
-  nginx_cache:
-    driver: local
+
+networks:
+  isodisplay-network:
+    driver: bridge
